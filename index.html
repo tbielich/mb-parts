@@ -6,7 +6,41 @@
     <title>MB Parts PoC</title>
   </head>
   <body>
-    <div id="app">Open console</div>
+    <main class="app">
+      <header class="toolbar">
+        <h1>MB Parts</h1>
+        <div class="toolbar-actions">
+          <label class="filter-toggle" for="in-stock-only">
+            <input id="in-stock-only" type="checkbox" />
+            <span>Nur lieferbar</span>
+          </label>
+          <button id="reload-btn" type="button">Reload</button>
+          <p id="status" class="status">idle</p>
+        </div>
+      </header>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th><button class="sort-btn" data-sort-key="partNumber" type="button">Artikelnummer</button></th>
+              <th>Name</th>
+              <th><button class="sort-btn" data-sort-key="price" type="button">Preis</button></th>
+              <th><button class="sort-btn" data-sort-key="availability" type="button">Lieferbarkeit</button></th>
+              <th>Link</th>
+            </tr>
+          </thead>
+          <tbody id="parts-tbody"></tbody>
+        </table>
+      </div>
+
+      <footer class="pagination">
+        <button id="prev-page-btn" type="button">Prev</button>
+        <p id="page-info" class="page-info">Page 0 / 0</p>
+        <button id="next-page-btn" type="button">Next</button>
+      </footer>
+    </main>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

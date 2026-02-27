@@ -1,8 +1,9 @@
 import { defineConfig } from 'vite';
 import * as cheerio from 'cheerio';
+import { gunzipSync } from 'node:zlib';
 
 type Availability = {
-  status: string;
+  status: 'in_stock' | 'out_of_stock' | 'unknown';
   label: string;
 };
 
@@ -16,10 +17,21 @@ type PartItem = {
 
 const MB_SEARCH_BASE = 'https://originalteile.mercedes-benz.de/search';
 const DEFAULT_LIMIT = 100;
-const MAX_LIMIT = 200;
-const MAX_PAGES = 10;
+const MAX_LIMIT = 5000;
+const MAX_PAGES = 500;
+const AVAILABILITY_FETCH_CONCURRENCY = 8;
+
+type ProductDetailMeta = {
+  availability: Availability;
+  price?: string;
+};
+
+const productDetailCache = new Map<string, ProductDetailMeta>();
 
 function parseLimit(value: string | null): number {
+  if (value?.toLowerCase() === 'all') {
+    return MAX_LIMIT;
+  }
   const parsed = Number.parseInt(value ?? '', 10);
   if (!Number.isFinite(parsed) || parsed <= 0) {
     return DEFAULT_LIMIT;
@@ -47,15 +59,15 @@ function extractAvailability(text: string): Availability {
   const normalized = text.toLowerCase();
 
   if (/nicht\s+verf\u00fcgbar|out\s+of\s+stock|sold\s+out/.test(normalized)) {
-    return { status: 'unavailable', label: 'Unavailable' };
+    return { status: 'out_of_stock', label: 'Out of stock' };
   }
 
   if (/verf\u00fcgbar|lieferbar|in\s+stock|sofort\s+lieferbar/.test(normalized)) {
-    return { status: 'available', label: 'Available' };
+    return { status: 'in_stock', label: 'In stock' };
   }
 
   if (/vorbestell|preorder/.test(normalized)) {
-    return { status: 'preorder', label: 'Preorder' };
+    return { status: 'unknown', label: 'Preorder' };
   }
 
   return { status: 'unknown', label: 'Unknown' };
@@ -78,6 +90,130 @@ function findPartNumber(text: string, prefixes: string[]): string | null {
   return null;
 }
 
+function extractPartNumberFromHref(href: string, prefixes: string[]): string | null {
+  const normalizedHref = href.toUpperCase();
+  for (const prefix of prefixes) {
+    const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`${escapedPrefix}[A-Z0-9-]{2,40}`, 'g');
+    const matches = normalizedHref.match(regex) ?? [];
+    for (const match of matches) {
+      const normalized = normalizePartNumber(match);
+      if (normalized.startsWith(prefix)) {
+        return normalized;
+      }
+    }
+  }
+  return null;
+}
+
+function toStringIfDefined(value: unknown): string | undefined {
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    return trimmed || undefined;
+  }
+  if (typeof value === 'number') {
+    return String(value);
+  }
+  return undefined;
+}
+
+function extractItemsFromStructuredScripts(html: string, baseUrl: string, prefixes: string[]): PartItem[] {
+  const $ = cheerio.load(html);
+  const extracted: PartItem[] = [];
+
+  const scriptContents: string[] = [];
+  $('script:not([src])').each((_, node) => {
+    const content = $(node).contents().text().trim();
+    if (content) {
+      scriptContents.push(content);
+    }
+  });
+
+  const jsonCandidates: unknown[] = [];
+  for (const content of scriptContents) {
+    if (content.startsWith('{') || content.startsWith('[')) {
+      try {
+        jsonCandidates.push(JSON.parse(content));
+      } catch {
+        // ignore
+      }
+    }
+
+    const assignMatch = content.match(/(?:__NEXT_DATA__|INITIAL_STATE|__INITIAL_STATE__|__STATE__)\s*=\s*(\{[\s\S]*\})\s*;?/);
+    if (assignMatch?.[1]) {
+      try {
+        jsonCandidates.push(JSON.parse(assignMatch[1]));
+      } catch {
+        // ignore
+      }
+    }
+  }
+
+  for (const candidate of jsonCandidates) {
+    const queue: unknown[] = [candidate];
+    while (queue.length > 0) {
+      const item = queue.shift();
+      if (!item) {
+        continue;
+      }
+      if (Array.isArray(item)) {
+        queue.push(...item);
+        continue;
+      }
+      if (typeof item !== 'object') {
+        continue;
+      }
+
+      const record = item as Record<string, unknown>;
+      const rawPartNumber =
+        toStringIfDefined(record.partNumber) ??
+        toStringIfDefined(record.productNumber) ??
+        toStringIfDefined(record.articleNumber) ??
+        toStringIfDefined(record.sku) ??
+        toStringIfDefined(record.productId);
+
+      const resolvedPartNumber = rawPartNumber ? normalizePartNumber(rawPartNumber) : null;
+      if (resolvedPartNumber && prefixes.some((prefix) => resolvedPartNumber.startsWith(prefix))) {
+        const rawUrl =
+          toStringIfDefined(record.url) ??
+          toStringIfDefined(record.link) ??
+          toStringIfDefined(record.productUrl) ??
+          baseUrl;
+        const resolvedUrl = new URL(rawUrl, baseUrl).toString();
+        const rawPrice =
+          toStringIfDefined(record.price) ??
+          toStringIfDefined(record.priceValue) ??
+          toStringIfDefined(record.formattedPrice);
+        const rawAvailability =
+          toStringIfDefined(record.availability) ??
+          toStringIfDefined(record.stockStatus) ??
+          toStringIfDefined(record.deliveryStatus) ??
+          '';
+
+        extracted.push({
+          partNumber: resolvedPartNumber,
+          name:
+            toStringIfDefined(record.name) ??
+            toStringIfDefined(record.title) ??
+            toStringIfDefined(record.productName) ??
+            `Part ${resolvedPartNumber}`,
+          price: rawPrice ? extractPrice(rawPrice) ?? rawPrice : undefined,
+          url: resolvedUrl,
+          availability: extractAvailability(rawAvailability),
+        });
+      }
+
+      for (const value of Object.values(record)) {
+        if (value && typeof value === 'object') {
+          queue.push(value);
+        }
+      }
+    }
+  }
+
+  return extracted;
+}
+
 function firstNonEmpty(...values: Array<string | undefined>): string | undefined {
   for (const value of values) {
     const normalized = value?.trim();
@@ -92,22 +228,53 @@ function extractItemsFromHtml(html: string, baseUrl: string, prefixes: string[])
   const $ = cheerio.load(html);
   const extracted: PartItem[] = [];
 
-  $('a[href]').each((_, node) => {
-    const anchor = $(node);
+  // Prefer product-like containers to avoid parsing global navigation links.
+  const productNodes = $(
+    [
+      'article',
+      'li.product',
+      'li.product-tile',
+      'li.result-item',
+      '.product',
+      '.product-tile',
+      '.result-item',
+      '[itemtype*="Product"]',
+      '[data-product-id]',
+      '[data-sku]',
+    ].join(','),
+  );
+
+  productNodes.each((_, node) => {
+    const container = $(node);
+    const anchor = container.find('a[href]').first();
     const href = anchor.attr('href');
     if (!href) {
       return;
     }
 
-    const container = anchor.closest('article, li, .product, .product-tile, .result-item, .item, div');
     const blockText = firstNonEmpty(container.text(), anchor.text()) ?? '';
     const normalizedText = blockText.replace(/\s+/g, ' ').trim();
     if (!normalizedText) {
       return;
     }
 
-    const partNumber = findPartNumber(normalizedText, prefixes);
-    if (!partNumber) {
+    const partNumberCandidate = firstNonEmpty(
+      container.attr('data-product-id'),
+      container.attr('data-sku'),
+      container.find('[data-product-id], [data-sku], .sku, .product-number, [itemprop="sku"]').first().text(),
+    );
+
+    const resolvedPartNumber =
+      (partNumberCandidate ? normalizePartNumber(partNumberCandidate) : null) ??
+      findPartNumber(normalizedText, prefixes) ??
+      extractPartNumberFromHref(href, prefixes);
+
+    if (!resolvedPartNumber) {
+      return;
+    }
+
+    const validPrefix = prefixes.some((prefix) => resolvedPartNumber.startsWith(prefix));
+    if (!validPrefix) {
       return;
     }
 
@@ -115,18 +282,69 @@ function extractItemsFromHtml(html: string, baseUrl: string, prefixes: string[])
       firstNonEmpty(
         container.find('h1, h2, h3, h4, [itemprop="name"], .product-name, .name, .title').first().text(),
         anchor.text(),
-      ) ?? `Part ${partNumber}`;
+      ) ?? `Part ${resolvedPartNumber}`;
 
     const fullUrl = new URL(href, baseUrl).toString();
 
     extracted.push({
-      partNumber,
+      partNumber: resolvedPartNumber,
       name,
       price: extractPrice(normalizedText),
       url: fullUrl,
       availability: extractAvailability(normalizedText),
     });
   });
+
+  // Fallback: if no product containers were detected, parse links but skip obvious nav/footer links.
+  if (extracted.length === 0) {
+    $('a[href]').each((_, node) => {
+      const anchor = $(node);
+      const href = anchor.attr('href');
+      if (!href) {
+        return;
+      }
+
+      const lowerHref = href.toLowerCase();
+      if (
+        lowerHref.includes('/konto') ||
+        lowerHref.includes('/cart') ||
+        lowerHref.includes('/warenkorb') ||
+        lowerHref.includes('/service') ||
+        lowerHref.includes('/impressum') ||
+        lowerHref.includes('/datenschutz')
+      ) {
+        return;
+      }
+
+      const container = anchor.closest('article, li, .product, .product-tile, .result-item, .item');
+      const blockText = firstNonEmpty(container.text(), anchor.text()) ?? '';
+      const normalizedText = blockText.replace(/\s+/g, ' ').trim();
+      if (!normalizedText) {
+        return;
+      }
+
+      const resolvedPartNumber = findPartNumber(normalizedText, prefixes) ?? extractPartNumberFromHref(href, prefixes);
+      if (!resolvedPartNumber) {
+        return;
+      }
+
+      const name =
+        firstNonEmpty(
+          container.find('h1, h2, h3, h4, [itemprop="name"], .product-name, .name, .title').first().text(),
+          anchor.text(),
+        ) ?? `Part ${resolvedPartNumber}`;
+
+      const fullUrl = new URL(href, baseUrl).toString();
+
+      extracted.push({
+        partNumber: resolvedPartNumber,
+        name,
+        price: extractPrice(normalizedText),
+        url: fullUrl,
+        availability: extractAvailability(normalizedText),
+      });
+    });
+  }
 
   $('script[type="application/ld+json"]').each((_, node) => {
     const jsonText = $(node).contents().text().trim();
@@ -182,11 +400,16 @@ function extractItemsFromHtml(html: string, baseUrl: string, prefixes: string[])
     }
   });
 
+  if (extracted.length < 3) {
+    extracted.push(...extractItemsFromStructuredScripts(html, baseUrl, prefixes));
+  }
+
   return extracted;
 }
 
 function findNextPageUrl(html: string, currentUrl: string): string | null {
   const $ = cheerio.load(html);
+  const current = new URL(currentUrl);
 
   const candidates = [
     $('link[rel="next"]').attr('href'),
@@ -207,7 +430,240 @@ function findNextPageUrl(html: string, currentUrl: string): string | null {
     }
   }
 
+  const pageKeys = ['page', 'p', 'paging', 'start', 'offset'];
+  const currentPageValue =
+    pageKeys
+      .map((key) => Number.parseInt(current.searchParams.get(key) ?? '', 10))
+      .find((value) => Number.isFinite(value)) ?? 1;
+
+  const numericCandidates: Array<{ href: string; pageValue: number }> = [];
+  $('a[href]').each((_, node) => {
+    const href = $(node).attr('href');
+    if (!href) {
+      return;
+    }
+
+    try {
+      const url = new URL(href, currentUrl);
+      if (url.pathname !== current.pathname) {
+        return;
+      }
+
+      for (const key of pageKeys) {
+        const value = Number.parseInt(url.searchParams.get(key) ?? '', 10);
+        if (Number.isFinite(value)) {
+          numericCandidates.push({ href: url.toString(), pageValue: value });
+          return;
+        }
+      }
+    } catch {
+      // Ignore malformed candidate links.
+    }
+  });
+
+  numericCandidates.sort((a, b) => a.pageValue - b.pageValue);
+  const nextNumeric = numericCandidates.find((item) => item.pageValue > currentPageValue);
+  if (nextNumeric && nextNumeric.href !== currentUrl) {
+    return nextNumeric.href;
+  }
+
   return null;
+}
+
+function decodeXmlEntities(value: string): string {
+  return value
+    .replaceAll('&amp;', '&')
+    .replaceAll('&lt;', '<')
+    .replaceAll('&gt;', '>')
+    .replaceAll('&quot;', '"')
+    .replaceAll('&#39;', "'");
+}
+
+function extractLocsFromXml(xml: string): string[] {
+  const locs: string[] = [];
+  const regex = /<loc>([\s\S]*?)<\/loc>/gi;
+  let match: RegExpExecArray | null;
+  while ((match = regex.exec(xml)) !== null) {
+    const value = decodeXmlEntities(match[1].trim());
+    if (value) {
+      locs.push(value);
+    }
+  }
+  return locs;
+}
+
+function isSitemapUrl(url: string): boolean {
+  return /\.xml(?:\.gz)?(?:$|\?)/i.test(url);
+}
+
+async function fetchTextWithGzipSupport(url: string, accept: string): Promise<string | null> {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'mb-parts-poc/1.0',
+        Accept: accept,
+      },
+    });
+    if (!response.ok) {
+      return null;
+    }
+
+    if (url.toLowerCase().includes('.gz')) {
+      const buffer = Buffer.from(await response.arrayBuffer());
+      try {
+        return gunzipSync(buffer).toString('utf-8');
+      } catch {
+        return buffer.toString('utf-8');
+      }
+    }
+
+    return await response.text();
+  } catch {
+    return null;
+  }
+}
+
+function guessNameFromUrl(url: string): string {
+  try {
+    const pathname = new URL(url).pathname;
+    const segments = pathname.split('/').filter(Boolean);
+    if (segments.length === 0) {
+      return 'Unknown';
+    }
+    const slug = segments.length >= 2 ? segments[segments.length - 2] : segments[segments.length - 1];
+    return slug
+      .replace(/[-_]+/g, ' ')
+      .trim()
+      .replace(/\b\w/g, (char) => char.toUpperCase()) || 'Unknown';
+  } catch {
+    return 'Unknown';
+  }
+}
+
+async function fetchProductDetailMeta(url: string): Promise<ProductDetailMeta> {
+  const cached = productDetailCache.get(url);
+  if (cached) {
+    return cached;
+  }
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'mb-parts-poc/1.0',
+        Accept: 'text/html',
+      },
+    });
+    if (!response.ok) {
+      return { availability: { status: 'unknown', label: 'Unknown' } };
+    }
+
+    const html = await response.text();
+    const $ = cheerio.load(html);
+    const rawPriceText = $('.product-detail-price').first().text().replace(/\s+/g, ' ').trim();
+    const detailPrice = rawPriceText ? extractPrice(rawPriceText) ?? rawPriceText : undefined;
+
+    if ($('.delivery-information.delivery-soldout').length > 0) {
+      const soldOutMeta: ProductDetailMeta = {
+        availability: { status: 'out_of_stock', label: 'Ausverkauft' },
+        price: detailPrice,
+      };
+      productDetailCache.set(url, soldOutMeta);
+      return soldOutMeta;
+    }
+
+    const infoText = $('.delivery-information').first().text().replace(/\s+/g, ' ').trim();
+    const detailMeta: ProductDetailMeta = {
+      availability: extractAvailability(infoText),
+      price: detailPrice,
+    };
+    productDetailCache.set(url, detailMeta);
+    return detailMeta;
+  } catch {
+    return { availability: { status: 'unknown', label: 'Unknown' } };
+  }
+}
+
+async function enrichItemsFromProductPage(items: PartItem[]): Promise<void> {
+  const queue = items.filter((item) => item.url);
+  for (let i = 0; i < queue.length; i += AVAILABILITY_FETCH_CONCURRENCY) {
+    const chunk = queue.slice(i, i + AVAILABILITY_FETCH_CONCURRENCY);
+    const results = await Promise.all(chunk.map((item) => fetchProductDetailMeta(item.url)));
+    for (let j = 0; j < chunk.length; j += 1) {
+      chunk[j].availability = results[j].availability;
+      if (results[j].price) {
+        chunk[j].price = results[j].price;
+      }
+    }
+  }
+}
+
+async function collectPartsFromSitemap(prefixes: string[], limit: number): Promise<PartItem[]> {
+  const sitemapQueue = [
+    'https://originalteile.mercedes-benz.de/sitemap.xml',
+    'https://originalteile.mercedes-benz.de/sitemap_index.xml',
+  ];
+  const visitedSitemaps = new Set<string>();
+  const foundItems: PartItem[] = [];
+  const seenPartNumbers = new Set<string>();
+  const maxSitemaps = 500;
+
+  const robotsTxt = await fetchTextWithGzipSupport(
+    'https://originalteile.mercedes-benz.de/robots.txt',
+    'text/plain,*/*;q=0.8',
+  );
+  if (robotsTxt) {
+    for (const line of robotsTxt.split(/\r?\n/)) {
+      const match = line.match(/^\s*Sitemap:\s*(\S+)\s*$/i);
+      if (match?.[1]) {
+        sitemapQueue.push(match[1]);
+      }
+    }
+  }
+
+  while (sitemapQueue.length > 0 && visitedSitemaps.size < maxSitemaps && foundItems.length < limit) {
+    const sitemapUrl = sitemapQueue.shift();
+    if (!sitemapUrl || visitedSitemaps.has(sitemapUrl)) {
+      continue;
+    }
+    visitedSitemaps.add(sitemapUrl);
+
+    const xml = await fetchTextWithGzipSupport(sitemapUrl, 'application/xml,text/xml;q=0.9,*/*;q=0.8');
+    if (!xml) {
+      continue;
+    }
+
+    const locs = extractLocsFromXml(xml);
+    for (const loc of locs) {
+      if (isSitemapUrl(loc)) {
+        if (!visitedSitemaps.has(loc)) {
+          sitemapQueue.push(loc);
+        }
+        continue;
+      }
+
+      const partNumber = extractPartNumberFromHref(loc, prefixes);
+      if (!partNumber) {
+        continue;
+      }
+      if (seenPartNumbers.has(partNumber)) {
+        continue;
+      }
+
+      seenPartNumbers.add(partNumber);
+      foundItems.push({
+        partNumber,
+        name: guessNameFromUrl(loc),
+        url: loc,
+        availability: { status: 'unknown', label: 'Unknown' },
+      });
+
+      if (foundItems.length >= limit) {
+        break;
+      }
+    }
+  }
+
+  return foundItems;
 }
 
 async function fetchParts(prefixes: string[], limit: number): Promise<{ items: PartItem[] }> {
@@ -219,49 +675,88 @@ async function fetchParts(prefixes: string[], limit: number): Promise<{ items: P
       break;
     }
 
-    let pageUrl: string | null = `${MB_SEARCH_BASE}?search=${encodeURIComponent(searchPrefix)}`;
-    const visited = new Set<string>();
-    let pageCount = 0;
-
-    while (pageUrl && !visited.has(pageUrl) && items.length < limit && pageCount < MAX_PAGES) {
-      visited.add(pageUrl);
-      pageCount += 1;
-
-      const response = await fetch(pageUrl, {
-        headers: {
-          'User-Agent': 'mb-parts-poc/1.0',
-          Accept: 'text/html',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Upstream request failed: ${response.status} ${response.statusText}`);
+    const searchTerms = [searchPrefix, `${searchPrefix}*`, `${searchPrefix} `];
+    for (const searchTerm of searchTerms) {
+      if (items.length >= limit) {
+        break;
       }
 
-      const html = await response.text();
-      const extracted = extractItemsFromHtml(html, pageUrl, prefixes);
+      let pageUrl: string | null = `${MB_SEARCH_BASE}?search=${encodeURIComponent(searchTerm)}`;
+      const visited = new Set<string>();
+      let pageCount = 0;
 
-      for (const item of extracted) {
-        const validPrefix = prefixes.some((prefix) => item.partNumber.startsWith(prefix));
-        if (!validPrefix) {
+      while (pageUrl && !visited.has(pageUrl) && items.length < limit && pageCount < MAX_PAGES) {
+        const currentPageUrl: string = pageUrl;
+        visited.add(currentPageUrl);
+        pageCount += 1;
+
+        const response: Response = await fetch(currentPageUrl, {
+          redirect: 'manual',
+          headers: {
+            'User-Agent': 'mb-parts-poc/1.0',
+            Accept: 'text/html',
+          },
+        });
+
+        if (response.status >= 300 && response.status < 400) {
+          const locationHeader: string | null = response.headers.get('location');
+          if (!locationHeader) {
+            break;
+          }
+          const redirectUrl: string = new URL(locationHeader, currentPageUrl).toString();
+          if (!redirectUrl.includes('/search')) {
+            // Skip product-detail redirects and try the next search term variant.
+            break;
+          }
+          pageUrl = redirectUrl;
           continue;
         }
-        if (seen.has(item.partNumber)) {
-          continue;
+
+        if (!response.ok) {
+          throw new Error(`Upstream request failed: ${response.status} ${response.statusText}`);
         }
 
-        seen.add(item.partNumber);
-        items.push(item);
+        const html = await response.text();
+        const extracted = extractItemsFromHtml(html, currentPageUrl, [searchPrefix]);
 
-        if (items.length >= limit) {
-          break;
+        for (const item of extracted) {
+          const validPrefix = item.partNumber.startsWith(searchPrefix);
+          if (!validPrefix) {
+            continue;
+          }
+          if (seen.has(item.partNumber)) {
+            continue;
+          }
+
+          seen.add(item.partNumber);
+          items.push(item);
+
+          if (items.length >= limit) {
+            break;
+          }
         }
+
+        pageUrl = findNextPageUrl(html, pageUrl);
       }
-
-      pageUrl = findNextPageUrl(html, pageUrl);
     }
   }
 
+  if (items.length <= 1 && items.length < limit) {
+    const remaining = limit - items.length;
+    const sitemapItems = await collectPartsFromSitemap(prefixes, remaining);
+    for (const item of sitemapItems) {
+      if (seen.has(item.partNumber)) {
+        continue;
+      }
+      seen.add(item.partNumber);
+      items.push(item);
+      if (items.length >= limit) {
+        break;
+      }
+    }
+  }
+
+  await enrichItemsFromProductPage(items);
   return { items };
 }
 
