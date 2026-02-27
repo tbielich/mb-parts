@@ -15,19 +15,18 @@ type PartItem = {
   availability?: Availability;
 };
 
-type PartsResponse = {
-  prefix: string;
+type PartsSnapshot = {
+  prefixes: string[];
   limit: number;
   count: number;
+  generatedAt: string;
   items: PartItem[];
 };
 
 type SortKey = 'partNumber' | 'price' | 'availability';
 type SortDirection = 'asc' | 'desc';
 
-const prefixes = ['A309', 'A310'];
-const perPrefixLimit = 20;
-const totalResultLimit = 20;
+const syncPrefixes = ['A309', 'A310'];
 const pageSize = 50;
 
 function getRequiredElement<T extends Element>(selector: string): T {
@@ -40,7 +39,7 @@ function getRequiredElement<T extends Element>(selector: string): T {
 
 const tbody = getRequiredElement<HTMLTableSectionElement>('#parts-tbody');
 const statusLine = getRequiredElement<HTMLParagraphElement>('#status');
-const reloadButton = getRequiredElement<HTMLButtonElement>('#reload-btn');
+const syncButton = getRequiredElement<HTMLButtonElement>('#reload-btn');
 const prevPageButton = getRequiredElement<HTMLButtonElement>('#prev-page-btn');
 const nextPageButton = getRequiredElement<HTMLButtonElement>('#next-page-btn');
 const pageInfo = getRequiredElement<HTMLParagraphElement>('#page-info');
@@ -52,6 +51,7 @@ let currentPage = 1;
 let sortKey: SortKey = 'partNumber';
 let sortDirection: SortDirection = 'asc';
 let inStockOnly = false;
+let generatedAt = '';
 
 function setStatus(text: string): void {
   statusLine.textContent = text;
@@ -197,41 +197,32 @@ function renderCurrentPage(): void {
   updatePaginationControls();
 }
 
-async function fetchPrefix(prefix: string): Promise<PartsResponse> {
-  const response = await fetch(`/api/parts?prefix=${encodeURIComponent(prefix)}&limit=${perPrefixLimit}`);
+async function loadSnapshot(): Promise<PartsSnapshot> {
+  const response = await fetch(`/data/parts.json?t=${Date.now()}`);
   if (!response.ok) {
-    throw new Error(`Request for ${prefix} failed with ${response.status}`);
+    throw new Error(`Local snapshot not found (${response.status}). Run sync first.`);
   }
-  return response.json() as Promise<PartsResponse>;
+  return response.json() as Promise<PartsSnapshot>;
 }
 
-function mergeDedupeSort(responses: PartsResponse[]): PartItem[] {
-  const mergedByPartNumber = new Map<string, PartItem>();
+function applySnapshot(snapshot: PartsSnapshot): void {
+  allItems = [...snapshot.items];
+  generatedAt = snapshot.generatedAt;
+  applySort(allItems);
+  currentPage = 1;
+  updateSortButtonLabels();
+  renderCurrentPage();
 
-  for (const response of responses) {
-    for (const item of response.items) {
-      if (!mergedByPartNumber.has(item.partNumber)) {
-        mergedByPartNumber.set(item.partNumber, item);
-      }
-    }
-  }
-
-  const merged = Array.from(mergedByPartNumber.values()).slice(0, totalResultLimit);
-  applySort(merged);
-  return merged;
+  const visibleCount = getVisibleItems().length;
+  const generatedLabel = generatedAt ? new Date(generatedAt).toLocaleString() : 'n/a';
+  setStatus(`done: ${visibleCount}/${allItems.length} (sync: ${generatedLabel})`);
 }
 
-async function loadParts(): Promise<void> {
-  setStatus('loading...');
-  reloadButton.disabled = true;
-
+async function loadPartsFromLocal(): Promise<void> {
+  setStatus('loading local snapshot...');
   try {
-    const responses = await Promise.all(prefixes.map((prefix) => fetchPrefix(prefix)));
-    allItems = mergeDedupeSort(responses);
-    currentPage = 1;
-    updateSortButtonLabels();
-    renderCurrentPage();
-    setStatus(`done: ${getVisibleItems().length}`);
+    const snapshot = await loadSnapshot();
+    applySnapshot(snapshot);
 
     console.table(
       allItems.map((item) => {
@@ -251,14 +242,35 @@ async function loadParts(): Promise<void> {
     allItems = [];
     currentPage = 1;
     renderCurrentPage();
-    console.error('Failed to fetch parts', error);
-  } finally {
-    reloadButton.disabled = false;
+    console.error('Failed to load local snapshot', error);
   }
 }
 
-reloadButton.addEventListener('click', () => {
-  void loadParts();
+async function syncAndReload(): Promise<void> {
+  setStatus('syncing...');
+  syncButton.disabled = true;
+
+  try {
+    const prefixParam = encodeURIComponent(syncPrefixes.join('|'));
+    const response = await fetch(`/api/sync?prefix=${prefixParam}&limit=all`, {
+      method: 'POST',
+    });
+    if (!response.ok) {
+      throw new Error(`Sync failed (${response.status})`);
+    }
+
+    await loadPartsFromLocal();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    setStatus(`error: ${message}`);
+    console.error('Sync failed', error);
+  } finally {
+    syncButton.disabled = false;
+  }
+}
+
+syncButton.addEventListener('click', () => {
+  void syncAndReload();
 });
 
 prevPageButton.addEventListener('click', () => {
@@ -301,8 +313,12 @@ inStockOnlyCheckbox.addEventListener('change', () => {
   inStockOnly = inStockOnlyCheckbox.checked;
   currentPage = 1;
   renderCurrentPage();
-  setStatus(`done: ${getVisibleItems().length}`);
+  if (allItems.length > 0) {
+    const visibleCount = getVisibleItems().length;
+    const generatedLabel = generatedAt ? new Date(generatedAt).toLocaleString() : 'n/a';
+    setStatus(`done: ${visibleCount}/${allItems.length} (sync: ${generatedLabel})`);
+  }
 });
 
 updateSortButtonLabels();
-void loadParts();
+void loadPartsFromLocal();

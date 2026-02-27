@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite';
 import * as cheerio from 'cheerio';
 import { gunzipSync } from 'node:zlib';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
 
 type Availability = {
   status: 'in_stock' | 'out_of_stock' | 'unknown';
@@ -16,14 +18,25 @@ type PartItem = {
 };
 
 const MB_SEARCH_BASE = 'https://originalteile.mercedes-benz.de/search';
+const DEFAULT_SYNC_PREFIXES = ['A309', 'A310'];
 const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 5000;
 const MAX_PAGES = 500;
 const AVAILABILITY_FETCH_CONCURRENCY = 8;
+const SNAPSHOT_JSON_PATH = resolve(process.cwd(), 'public/data/parts.json');
+const SNAPSHOT_YAML_PATH = resolve(process.cwd(), 'public/data/parts.yaml');
 
 type ProductDetailMeta = {
   availability: Availability;
   price?: string;
+};
+
+type PartsSnapshot = {
+  prefixes: string[];
+  limit: number;
+  count: number;
+  generatedAt: string;
+  items: PartItem[];
 };
 
 const productDetailCache = new Map<string, ProductDetailMeta>();
@@ -760,6 +773,26 @@ async function fetchParts(prefixes: string[], limit: number): Promise<{ items: P
   return { items };
 }
 
+async function writeSnapshot(snapshot: PartsSnapshot): Promise<void> {
+  await mkdir(dirname(SNAPSHOT_JSON_PATH), { recursive: true });
+  await writeFile(SNAPSHOT_JSON_PATH, `${JSON.stringify(snapshot, null, 2)}\n`, 'utf-8');
+  await writeFile(SNAPSHOT_YAML_PATH, `${JSON.stringify(snapshot, null, 2)}\n`, 'utf-8');
+}
+
+async function syncSnapshot(prefixes: string[], limit: number): Promise<PartsSnapshot> {
+  const { items } = await fetchParts(prefixes, limit);
+  const sortedItems = [...items].sort((left, right) => left.partNumber.localeCompare(right.partNumber));
+  const snapshot: PartsSnapshot = {
+    prefixes,
+    limit,
+    count: sortedItems.length,
+    generatedAt: new Date().toISOString(),
+    items: sortedItems,
+  };
+  await writeSnapshot(snapshot);
+  return snapshot;
+}
+
 export default defineConfig({
   server: {
     middlewareMode: false,
@@ -774,6 +807,36 @@ export default defineConfig({
           }
 
           const requestUrl = new URL(req.url, 'http://localhost');
+          if (req.method === 'POST' && requestUrl.pathname === '/api/sync') {
+            const prefixes = parsePrefixes(requestUrl.searchParams.get('prefix'));
+            const effectivePrefixes = prefixes.length > 0 ? prefixes : DEFAULT_SYNC_PREFIXES;
+            const limit = parseLimit(requestUrl.searchParams.get('limit') ?? 'all');
+
+            try {
+              const snapshot = await syncSnapshot(effectivePrefixes, limit);
+              res.statusCode = 200;
+              res.setHeader('Content-Type', 'application/json; charset=utf-8');
+              res.end(
+                JSON.stringify({
+                  ok: true,
+                  prefixes: snapshot.prefixes,
+                  count: snapshot.count,
+                  generatedAt: snapshot.generatedAt,
+                }),
+              );
+            } catch (error) {
+              res.statusCode = 502;
+              res.setHeader('Content-Type', 'application/json; charset=utf-8');
+              res.end(
+                JSON.stringify({
+                  ok: false,
+                  error: error instanceof Error ? error.message : 'Unknown error',
+                }),
+              );
+            }
+            return;
+          }
+
           if (req.method !== 'GET' || requestUrl.pathname !== '/api/parts') {
             return next();
           }
