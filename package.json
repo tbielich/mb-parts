@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "sync:parts": "node scripts/sync-parts.mjs",
+    "sync:prices": "node scripts/sync-prices.mjs",
+    "sync:all": "npm run sync:parts && npm run sync:prices",
     "build": "npm run sync:parts && tsc && vite build",
     "preview": "vite preview"
   },

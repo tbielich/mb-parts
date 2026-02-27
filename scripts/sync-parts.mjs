@@ -1,13 +1,23 @@
 import * as cheerio from 'cheerio';
 import { gunzipSync } from 'node:zlib';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 
-const PREFIXES = ['A309', 'A310'];
-const LIMIT = 5000;
+const PREFIXES = String(process.env.PART_PREFIXES ?? '')
+  .split('|')
+  .map((value) => value.trim().toUpperCase())
+  .filter(Boolean);
+const LIMIT = Number.parseInt(process.env.PART_LIMIT ?? '', 10);
 const CONCURRENCY = 8;
-const JSON_PATH = resolve(process.cwd(), 'public/data/parts.json');
-const YAML_PATH = resolve(process.cwd(), 'public/data/parts.yaml');
+const MAX_SITEMAPS = Number.parseInt(process.env.PART_MAX_SITEMAPS ?? '20000', 10);
+const ENRICH_DETAILS =
+  process.env.PART_ENRICH_DETAILS == null
+    ? PREFIXES.length > 0
+    : ['1', 'true', 'yes'].includes(String(process.env.PART_ENRICH_DETAILS).toLowerCase());
+const BASE_JSON_PATH = resolve(process.cwd(), 'public/data/parts-base.json');
+const BASE_YAML_PATH = resolve(process.cwd(), 'public/data/parts-base.yaml');
+const MERGED_JSON_PATH = resolve(process.cwd(), 'public/data/parts.json');
+const PRICE_JSON_PATH = resolve(process.cwd(), 'public/data/parts-price.json');
 
 function normalizePartNumber(value) {
   return String(value ?? '').toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -15,6 +25,13 @@ function normalizePartNumber(value) {
 
 function extractPartNumberFromHref(href, prefixes) {
   const normalizedHref = String(href).toUpperCase();
+  if (prefixes.length === 0) {
+    const genericMatches = normalizedHref.match(/A\d{9,14}/g) ?? [];
+    if (genericMatches.length > 0) {
+      return normalizePartNumber(genericMatches[0]);
+    }
+  }
+
   for (const prefix of prefixes) {
     const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(`${escapedPrefix}[A-Z0-9-]{2,40}`, 'g');
@@ -128,7 +145,7 @@ async function collectPartsFromSitemap(prefixes, limit) {
   const visitedSitemaps = new Set();
   const foundItems = [];
   const seenPartNumbers = new Set();
-  const maxSitemaps = 500;
+  const maxSitemaps = Number.isFinite(MAX_SITEMAPS) && MAX_SITEMAPS > 0 ? MAX_SITEMAPS : 20000;
 
   const robotsTxt = await fetchTextWithGzipSupport(
     'https://originalteile.mercedes-benz.de/robots.txt',
@@ -157,6 +174,12 @@ async function collectPartsFromSitemap(prefixes, limit) {
     }
 
     const locs = extractLocsFromXml(xml);
+    if (visitedSitemaps.size % 100 === 0) {
+      console.log(
+        `[sync] sitemaps=${visitedSitemaps.size} queue=${sitemapQueue.length} found=${foundItems.length}`,
+      );
+    }
+
     for (const loc of locs) {
       if (isSitemapUrl(loc)) {
         if (!visitedSitemaps.has(loc)) {
@@ -177,6 +200,9 @@ async function collectPartsFromSitemap(prefixes, limit) {
         url: loc,
         availability: { status: 'unknown', label: 'Unknown' },
       });
+      if (foundItems.length % 100 === 0) {
+        console.log(`[sync] found parts=${foundItems.length}`);
+      }
 
       if (foundItems.length >= limit) {
         break;
@@ -216,6 +242,7 @@ async function fetchProductDetailMeta(url) {
 }
 
 async function enrichItems(items) {
+  console.log(`[sync] enrich start total=${items.length} concurrency=${CONCURRENCY}`);
   for (let i = 0; i < items.length; i += CONCURRENCY) {
     const chunk = items.slice(i, i + CONCURRENCY);
     const results = await Promise.all(chunk.map((item) => fetchProductDetailMeta(item.url)));
@@ -225,27 +252,62 @@ async function enrichItems(items) {
         chunk[j].price = results[j].price;
       }
     }
+    const processed = Math.min(i + CONCURRENCY, items.length);
+    if (processed % 50 === 0 || processed === items.length) {
+      console.log(`[sync] enriched ${processed}/${items.length}`);
+    }
   }
 }
 
 async function main() {
-  const items = await collectPartsFromSitemap(PREFIXES, LIMIT);
-  await enrichItems(items);
+  const effectiveLimit = Number.isFinite(LIMIT) && LIMIT > 0 ? LIMIT : Number.MAX_SAFE_INTEGER;
+  console.log(
+    `[sync] start prefixes=${PREFIXES.length > 0 ? PREFIXES.join(',') : 'ALL'} limit=${
+      Number.isFinite(LIMIT) && LIMIT > 0 ? LIMIT : 'unlimited'
+    } enrich=${ENRICH_DETAILS ? 'on' : 'off'}`,
+  );
+
+  const items = await collectPartsFromSitemap(PREFIXES, effectiveLimit);
+  console.log(`[sync] collection done count=${items.length}`);
+  if (ENRICH_DETAILS) {
+    await enrichItems(items);
+  } else {
+    console.log('[sync] enrich skipped');
+  }
   items.sort((a, b) => a.partNumber.localeCompare(b.partNumber));
 
   const payload = {
     prefixes: PREFIXES,
-    limit: LIMIT,
+    limit: Number.isFinite(LIMIT) && LIMIT > 0 ? LIMIT : 0,
     count: items.length,
     generatedAt: new Date().toISOString(),
     items,
   };
 
-  await mkdir(dirname(JSON_PATH), { recursive: true });
-  await writeFile(JSON_PATH, `${JSON.stringify(payload, null, 2)}\n`, 'utf-8');
-  await writeFile(YAML_PATH, `${JSON.stringify(payload, null, 2)}\n`, 'utf-8');
+  let priceMap = {};
+  try {
+    const rawPriceJson = await readFile(PRICE_JSON_PATH, 'utf-8');
+    const parsed = JSON.parse(rawPriceJson);
+    priceMap = parsed?.prices ?? {};
+  } catch {
+    // Optional, continue without price map.
+  }
 
-  console.log(`Synced ${payload.count} parts to ${JSON_PATH}`);
+  const mergedItems = payload.items.map((item) => {
+    const entry = priceMap[item.partNumber];
+    if (entry?.price) {
+      return { ...item, price: entry.price };
+    }
+    return item;
+  });
+  const mergedPayload = { ...payload, items: mergedItems };
+
+  await mkdir(dirname(BASE_JSON_PATH), { recursive: true });
+  await writeFile(BASE_JSON_PATH, `${JSON.stringify(payload, null, 2)}\n`, 'utf-8');
+  await writeFile(BASE_YAML_PATH, `${JSON.stringify(payload, null, 2)}\n`, 'utf-8');
+  await writeFile(MERGED_JSON_PATH, `${JSON.stringify(mergedPayload, null, 2)}\n`, 'utf-8');
+
+  console.log(`Synced ${payload.count} parts to ${BASE_JSON_PATH}`);
 }
 
 main().catch((error) => {

@@ -23,10 +23,36 @@ type PartsSnapshot = {
   items: PartItem[];
 };
 
+type PriceSnapshot = {
+  updatedAt: string;
+  count: number;
+  prices: Record<
+    string,
+    {
+      price?: string;
+      availability?: Availability;
+      updatedAt: string;
+    }
+  >;
+};
+
+type EnrichVisibleResponse = {
+  ok: boolean;
+  updated: number;
+  entries: Record<
+    string,
+    {
+      price?: string;
+      availability?: Availability;
+      updatedAt: string;
+    }
+  >;
+};
+
 type SortKey = 'partNumber' | 'price' | 'availability';
 type SortDirection = 'asc' | 'desc';
 
-const syncPrefixes = ['A309', 'A310'];
+const syncPrefixes: string[] = [];
 const pageSize = 50;
 
 function getRequiredElement<T extends Element>(selector: string): T {
@@ -52,6 +78,8 @@ let sortKey: SortKey = 'partNumber';
 let sortDirection: SortDirection = 'asc';
 let inStockOnly = false;
 let generatedAt = '';
+const lazyLoadingPartNumbers = new Set<string>();
+const lazyLoadedPartNumbers = new Set<string>();
 
 function setStatus(text: string): void {
   statusLine.textContent = text;
@@ -161,16 +189,23 @@ function renderTable(items: PartItem[]): void {
   tbody.innerHTML = items
     .map((item) => {
       const availability = getAvailability(item);
+      const isLazyLoading = lazyLoadingPartNumbers.has(item.partNumber);
       const price = item.price?.trim() || 'N/A';
       const name = item.name?.trim() || 'N/A';
       const badgeClass = `badge badge-${availability.status}`;
+      const priceCell = isLazyLoading
+        ? '<span class="skeleton skeleton-text" aria-label="Loading price"></span>'
+        : escapeHtml(price);
+      const availabilityCell = isLazyLoading
+        ? '<span class="skeleton skeleton-pill" aria-label="Loading availability"></span>'
+        : `<span class="${badgeClass}">${escapeHtml(availability.label)}</span>`;
 
       return `
         <tr>
           <td data-label="Artikelnummer">${escapeHtml(item.partNumber)}</td>
           <td data-label="Name">${escapeHtml(name)}</td>
-          <td data-label="Preis">${escapeHtml(price)}</td>
-          <td data-label="Verfügbarkeit"><span class="${badgeClass}">${escapeHtml(availability.label)}</span></td>
+          <td data-label="Preis">${priceCell}</td>
+          <td data-label="Verfügbarkeit">${availabilityCell}</td>
           <td data-label="Link"><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Open</a></td>
         </tr>
       `;
@@ -178,7 +213,67 @@ function renderTable(items: PartItem[]): void {
     .join('');
 }
 
-function renderCurrentPage(): void {
+function shouldLazyEnrich(item: PartItem): boolean {
+  const availability = getAvailability(item);
+  return !item.price || availability.status === 'unknown';
+}
+
+async function lazyEnrichVisibleItems(items: PartItem[]): Promise<void> {
+  const candidates = items.filter(
+    (item) =>
+      shouldLazyEnrich(item) &&
+      !lazyLoadingPartNumbers.has(item.partNumber) &&
+      !lazyLoadedPartNumbers.has(item.partNumber),
+  );
+
+  if (candidates.length === 0) {
+    return;
+  }
+
+  const partNumbers = candidates.map((item) => item.partNumber);
+  partNumbers.forEach((partNumber) => lazyLoadingPartNumbers.add(partNumber));
+  renderCurrentPage({ triggerLazy: false });
+
+  try {
+    const response = await fetch('/api/enrich-visible', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ partNumbers }),
+    });
+    if (!response.ok) {
+      throw new Error(`Lazy enrich failed (${response.status})`);
+    }
+
+    const payload = (await response.json()) as EnrichVisibleResponse;
+    for (const item of allItems) {
+      const entry = payload.entries[item.partNumber];
+      if (!entry) {
+        continue;
+      }
+      if (entry.price) {
+        item.price = entry.price;
+      }
+      if (entry.availability) {
+        item.availability = entry.availability;
+      }
+    }
+
+    if (sortKey === 'price' || sortKey === 'availability') {
+      applySort(allItems);
+    }
+  } catch (error) {
+    console.error('Lazy enrichment failed', error);
+  } finally {
+    partNumbers.forEach((partNumber) => {
+      lazyLoadingPartNumbers.delete(partNumber);
+      lazyLoadedPartNumbers.add(partNumber);
+    });
+    renderCurrentPage({ triggerLazy: false });
+  }
+}
+
+function renderCurrentPage(options: { triggerLazy?: boolean } = {}): void {
+  const { triggerLazy = true } = options;
   const visibleItems = getVisibleItems();
   const pageCount = getPageCount();
   if (pageCount === 0) {
@@ -193,21 +288,36 @@ function renderCurrentPage(): void {
 
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = startIndex + pageSize;
-  renderTable(visibleItems.slice(startIndex, endIndex));
+  const pageItems = visibleItems.slice(startIndex, endIndex);
+  renderTable(pageItems);
   updatePaginationControls();
+
+  if (triggerLazy) {
+    void lazyEnrichVisibleItems(pageItems);
+  }
 }
 
 async function loadSnapshot(): Promise<PartsSnapshot> {
-  const response = await fetch(`/data/parts.json?t=${Date.now()}`);
+  const response = await fetch(`/data/parts-base.json?t=${Date.now()}`);
   if (!response.ok) {
-    throw new Error(`Local snapshot not found (${response.status}). Run sync first.`);
+    throw new Error(`Local base snapshot not found (${response.status}). Run sync first.`);
   }
   return response.json() as Promise<PartsSnapshot>;
+}
+
+async function loadPriceSnapshot(): Promise<PriceSnapshot> {
+  const response = await fetch(`/data/parts-price.json?t=${Date.now()}`);
+  if (!response.ok) {
+    return { updatedAt: '', count: 0, prices: {} };
+  }
+  return response.json() as Promise<PriceSnapshot>;
 }
 
 function applySnapshot(snapshot: PartsSnapshot): void {
   allItems = [...snapshot.items];
   generatedAt = snapshot.generatedAt;
+  lazyLoadingPartNumbers.clear();
+  lazyLoadedPartNumbers.clear();
   applySort(allItems);
   currentPage = 1;
   updateSortButtonLabels();
@@ -221,8 +331,23 @@ function applySnapshot(snapshot: PartsSnapshot): void {
 async function loadPartsFromLocal(): Promise<void> {
   setStatus('loading local snapshot...');
   try {
-    const snapshot = await loadSnapshot();
-    applySnapshot(snapshot);
+    const [snapshot, priceSnapshot] = await Promise.all([loadSnapshot(), loadPriceSnapshot()]);
+    const mergedSnapshot: PartsSnapshot = {
+      ...snapshot,
+      items: snapshot.items.map((item) => {
+        const priceEntry = priceSnapshot.prices[item.partNumber];
+        if (priceEntry?.price || priceEntry?.availability) {
+          return {
+            ...item,
+            price: priceEntry.price ?? item.price,
+            availability: priceEntry.availability ?? item.availability,
+          };
+        }
+        return item;
+      }),
+    };
+
+    applySnapshot(mergedSnapshot);
 
     console.table(
       allItems.map((item) => {
@@ -247,16 +372,24 @@ async function loadPartsFromLocal(): Promise<void> {
 }
 
 async function syncAndReload(): Promise<void> {
-  setStatus('syncing...');
+  setStatus('syncing base...');
   syncButton.disabled = true;
 
   try {
-    const prefixParam = encodeURIComponent(syncPrefixes.join('|'));
-    const response = await fetch(`/api/sync?prefix=${prefixParam}&limit=all`, {
+    const prefixParam = syncPrefixes.length > 0 ? `prefix=${encodeURIComponent(syncPrefixes.join('|'))}&` : '';
+    const baseResponse = await fetch(`/api/sync?${prefixParam}limit=all`, {
       method: 'POST',
     });
-    if (!response.ok) {
-      throw new Error(`Sync failed (${response.status})`);
+    if (!baseResponse.ok) {
+      throw new Error(`Base sync failed (${baseResponse.status})`);
+    }
+
+    setStatus('syncing prices...');
+    const priceResponse = await fetch('/api/sync-prices?batch=500', {
+      method: 'POST',
+    });
+    if (!priceResponse.ok) {
+      throw new Error(`Price sync failed (${priceResponse.status})`);
     }
 
     await loadPartsFromLocal();
