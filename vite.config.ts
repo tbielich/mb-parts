@@ -18,16 +18,14 @@ type PartItem = {
 };
 
 const MB_SEARCH_BASE = 'https://originalteile.mercedes-benz.de/search';
-const DEFAULT_SYNC_PREFIXES: string[] = [];
+const DEFAULT_SYNC_PREFIXES: string[] = ['A309', 'A310'];
 const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 5000;
 const MAX_PAGES = 500;
 const AVAILABILITY_FETCH_CONCURRENCY = 8;
 const BASE_SNAPSHOT_JSON_PATH = resolve(process.cwd(), 'public/data/parts-base.json');
-const BASE_SNAPSHOT_YAML_PATH = resolve(process.cwd(), 'public/data/parts-base.yaml');
 const PRICE_SNAPSHOT_JSON_PATH = resolve(process.cwd(), 'public/data/parts-price.json');
 const PRICE_SNAPSHOT_STATE_JSON_PATH = resolve(process.cwd(), 'public/data/parts-price-state.json');
-const MERGED_SNAPSHOT_JSON_PATH = resolve(process.cwd(), 'public/data/parts.json');
 
 type ProductDetailMeta = {
   availability: Availability;
@@ -853,23 +851,6 @@ async function getBaseSnapshot(): Promise<PartsSnapshot> {
 async function writeBaseSnapshot(snapshot: PartsSnapshot): Promise<void> {
   await mkdir(dirname(BASE_SNAPSHOT_JSON_PATH), { recursive: true });
   await writeFile(BASE_SNAPSHOT_JSON_PATH, `${JSON.stringify(snapshot, null, 2)}\n`, 'utf-8');
-  await writeFile(BASE_SNAPSHOT_YAML_PATH, `${JSON.stringify(snapshot, null, 2)}\n`, 'utf-8');
-}
-
-async function writeMergedSnapshot(baseSnapshot: PartsSnapshot, priceSnapshot: PriceSnapshot): Promise<void> {
-  const mergedItems = baseSnapshot.items.map((item) => {
-    const priceEntry = priceSnapshot.prices[item.partNumber];
-    if (!priceEntry) {
-      return item;
-    }
-    return {
-      ...item,
-      price: priceEntry.price ?? item.price,
-      availability: priceEntry.availability ?? item.availability,
-    };
-  });
-  const mergedSnapshot = { ...baseSnapshot, items: mergedItems };
-  await writeFile(MERGED_SNAPSHOT_JSON_PATH, `${JSON.stringify(mergedSnapshot, null, 2)}\n`, 'utf-8');
 }
 
 async function syncBaseSnapshot(prefixes: string[], limit: number): Promise<PartsSnapshot> {
@@ -884,8 +865,6 @@ async function syncBaseSnapshot(prefixes: string[], limit: number): Promise<Part
   };
   await writeBaseSnapshot(snapshot);
   baseSnapshotCache = snapshot;
-  const priceSnapshot = await readPriceSnapshot();
-  await writeMergedSnapshot(snapshot, priceSnapshot);
   return snapshot;
 }
 
@@ -997,8 +976,6 @@ async function syncPriceBatch(batchSize: number): Promise<{ updated: number; pri
     `${JSON.stringify({ cursor: nextCursor, updatedAt }, null, 2)}\n`,
     'utf-8',
   );
-
-  await writeMergedSnapshot(baseSnapshot, priceSnapshot);
   return { updated: candidates.length, pricedCount: priceSnapshot.count, nextCursor };
 }
 

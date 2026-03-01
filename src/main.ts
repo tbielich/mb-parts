@@ -15,27 +15,6 @@ type PartItem = {
   availability?: Availability;
 };
 
-type PartsSnapshot = {
-  prefixes: string[];
-  limit: number;
-  count: number;
-  generatedAt: string;
-  items: PartItem[];
-};
-
-type PriceSnapshot = {
-  updatedAt: string;
-  count: number;
-  prices: Record<
-    string,
-    {
-      price?: string;
-      availability?: Availability;
-      updatedAt: string;
-    }
-  >;
-};
-
 type EnrichVisibleResponse = {
   ok: boolean;
   updated: number;
@@ -49,11 +28,39 @@ type EnrichVisibleResponse = {
   >;
 };
 
+type ChunkMeta = {
+  id: number;
+  file: string;
+  count: number;
+  firstPartNumber: string;
+  lastPartNumber: string;
+};
+
+type ChunkManifest = {
+  vehicleKey: string;
+  generatedAt: string;
+  source: string;
+  chunkSizeLines: number;
+  chunkCount: number;
+  totalParts: number;
+  chunks: ChunkMeta[];
+};
+
+type ChunkMap = {
+  vehicleKey: string;
+  generatedAt: string;
+  byPartPrefix4: Record<string, number[]>;
+  byNamePrefix3: Record<string, number[]>;
+};
+
 type SortKey = 'partNumber' | 'price' | 'availability';
 type SortDirection = 'asc' | 'desc';
 
-const syncPrefixes: string[] = [];
+const allowedPartPrefixes: string[] = ['A309', 'A310'];
+const syncPrefixes: string[] = [...allowedPartPrefixes];
 const pageSize = 50;
+const vehicleKey = 'default';
+const chunksBasePath = `/data/vehicles/${vehicleKey}/index/chunks`;
 
 function getRequiredElement<T extends Element>(selector: string): T {
   const element = document.querySelector<T>(selector);
@@ -69,17 +76,23 @@ const syncButton = getRequiredElement<HTMLButtonElement>('#reload-btn');
 const prevPageButton = getRequiredElement<HTMLButtonElement>('#prev-page-btn');
 const nextPageButton = getRequiredElement<HTMLButtonElement>('#next-page-btn');
 const pageInfo = getRequiredElement<HTMLParagraphElement>('#page-info');
+const searchInput = getRequiredElement<HTMLInputElement>('#search-input');
 const inStockOnlyCheckbox = getRequiredElement<HTMLInputElement>('#in-stock-only');
 const sortButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.sort-btn'));
 
 let allItems: PartItem[] = [];
+let initialChunkItems: PartItem[] = [];
 let currentPage = 1;
 let sortKey: SortKey = 'partNumber';
 let sortDirection: SortDirection = 'asc';
 let inStockOnly = false;
-let generatedAt = '';
+let searchQuery = '';
+
 const lazyLoadingPartNumbers = new Set<string>();
 const lazyLoadedPartNumbers = new Set<string>();
+const chunkCache = new Map<number, PartItem[]>();
+let chunkManifestCache: ChunkManifest | null = null;
+let chunkMapCache: ChunkMap | null = null;
 
 function setStatus(text: string): void {
   statusLine.textContent = text;
@@ -157,23 +170,50 @@ function escapeHtml(value: string): string {
     .replaceAll("'", '&#39;');
 }
 
-function getVisibleItems(): PartItem[] {
-  if (!inStockOnly) {
-    return allItems;
+function normalizeSearchValue(raw: string): string {
+  return raw.trim().toLowerCase();
+}
+
+function isAllowedPartNumber(partNumber: string): boolean {
+  return allowedPartPrefixes.some((prefix) => partNumber.startsWith(prefix));
+}
+
+function isExcludedPartNumber(partNumber: string): boolean {
+  return /^A0{10,}$/.test(partNumber);
+}
+
+function matchesSearch(item: PartItem, query: string): boolean {
+  const normalized = normalizeSearchValue(query);
+  if (!normalized) {
+    return true;
   }
-  return allItems.filter((item) => getAvailability(item).status === 'in_stock');
+  return (
+    item.partNumber.toLowerCase().includes(normalized) ||
+    item.name.toLowerCase().includes(normalized)
+  );
+}
+
+function getVisibleItems(): PartItem[] {
+  return allItems.filter((item) => {
+    if (inStockOnly && getAvailability(item).status !== 'in_stock') {
+      return false;
+    }
+    return matchesSearch(item, searchQuery);
+  });
+}
+
+function getPageCountForVisibleCount(visibleCount: number): number {
+  if (visibleCount === 0) {
+    return 0;
+  }
+  return Math.ceil(visibleCount / pageSize);
 }
 
 function getPageCount(): number {
-  const visibleItems = getVisibleItems();
-  if (visibleItems.length === 0) {
-    return 0;
-  }
-  return Math.ceil(visibleItems.length / pageSize);
+  return getPageCountForVisibleCount(getVisibleItems().length);
 }
 
-function updatePaginationControls(): void {
-  const pageCount = getPageCount();
+function updatePaginationControls(pageCount: number): void {
   pageInfo.textContent = pageCount === 0 ? 'Page 0 / 0' : `Page ${currentPage} / ${pageCount}`;
 
   prevPageButton.disabled = pageCount === 0 || currentPage <= 1;
@@ -275,10 +315,10 @@ async function lazyEnrichVisibleItems(items: PartItem[]): Promise<void> {
 function renderCurrentPage(options: { triggerLazy?: boolean } = {}): void {
   const { triggerLazy = true } = options;
   const visibleItems = getVisibleItems();
-  const pageCount = getPageCount();
+  const pageCount = getPageCountForVisibleCount(visibleItems.length);
   if (pageCount === 0) {
     renderTable([]);
-    updatePaginationControls();
+    updatePaginationControls(0);
     return;
   }
 
@@ -290,84 +330,178 @@ function renderCurrentPage(options: { triggerLazy?: boolean } = {}): void {
   const endIndex = startIndex + pageSize;
   const pageItems = visibleItems.slice(startIndex, endIndex);
   renderTable(pageItems);
-  updatePaginationControls();
+  updatePaginationControls(pageCount);
 
   if (triggerLazy) {
     void lazyEnrichVisibleItems(pageItems);
   }
 }
 
-async function loadSnapshot(): Promise<PartsSnapshot> {
-  const response = await fetch(`/data/parts-base.json?t=${Date.now()}`);
-  if (!response.ok) {
-    throw new Error(`Local base snapshot not found (${response.status}). Run sync first.`);
-  }
-  return response.json() as Promise<PartsSnapshot>;
+function clearResultState(): void {
+  allItems = [];
+  currentPage = 1;
+  lazyLoadingPartNumbers.clear();
+  lazyLoadedPartNumbers.clear();
+  renderCurrentPage({ triggerLazy: false });
 }
 
-async function loadPriceSnapshot(): Promise<PriceSnapshot> {
-  const response = await fetch(`/data/parts-price.json?t=${Date.now()}`);
-  if (!response.ok) {
-    return { updatedAt: '', count: 0, prices: {} };
-  }
-  return response.json() as Promise<PriceSnapshot>;
-}
-
-function applySnapshot(snapshot: PartsSnapshot): void {
-  allItems = [...snapshot.items];
-  generatedAt = snapshot.generatedAt;
+function applyResultItems(items: PartItem[]): void {
+  allItems = [...items];
   lazyLoadingPartNumbers.clear();
   lazyLoadedPartNumbers.clear();
   applySort(allItems);
   currentPage = 1;
   updateSortButtonLabels();
   renderCurrentPage();
-
-  const visibleCount = getVisibleItems().length;
-  const generatedLabel = generatedAt ? new Date(generatedAt).toLocaleString() : 'n/a';
-  setStatus(`done: ${visibleCount}/${allItems.length} (sync: ${generatedLabel})`);
 }
 
-async function loadPartsFromLocal(): Promise<void> {
-  setStatus('loading local snapshot...');
+function showInitialChunkResults(statusPrefix = 'done'): void {
+  applyResultItems(initialChunkItems);
+  const visibleCount = getVisibleItems().length;
+  setStatus(`${statusPrefix}: ${visibleCount}/${allItems.length} (${allowedPartPrefixes.join('|')})`);
+  console.log(
+    `[MB Parts] loaded ${allItems.length} items (${allowedPartPrefixes.join('|')})`,
+  );
+  console.table(
+    allItems.map((item) => ({
+      partNumber: item.partNumber,
+      name: item.name,
+      price: item.price ?? 'N/A',
+      availability: getAvailability(item).label,
+      url: item.url,
+    })),
+  );
+}
+
+async function loadChunkArtifacts(): Promise<{ manifest: ChunkManifest; map: ChunkMap }> {
+  if (chunkManifestCache && chunkMapCache) {
+    return { manifest: chunkManifestCache, map: chunkMapCache };
+  }
+
+  const [manifestResponse, mapResponse] = await Promise.all([
+    fetch(`${chunksBasePath}/manifest.json?t=${Date.now()}`),
+    fetch(`${chunksBasePath}/chunk-map.json?t=${Date.now()}`),
+  ]);
+
+  if (!manifestResponse.ok) {
+    throw new Error(`Missing manifest.json (${manifestResponse.status}). Run chunk:index first.`);
+  }
+  if (!mapResponse.ok) {
+    throw new Error(`Missing chunk-map.json (${mapResponse.status}). Run chunk:index first.`);
+  }
+
+  chunkManifestCache = (await manifestResponse.json()) as ChunkManifest;
+  chunkMapCache = (await mapResponse.json()) as ChunkMap;
+  return { manifest: chunkManifestCache, map: chunkMapCache };
+}
+
+function getCatalogChunkIds(manifest: ChunkManifest, map: ChunkMap): number[] {
+  const ids = new Set<number>();
+  for (const prefix of allowedPartPrefixes) {
+    for (const chunkId of map.byPartPrefix4[prefix] ?? []) {
+      ids.add(chunkId);
+    }
+  }
+
+  if (ids.size === 0) {
+    return [];
+  }
+
+  const knownChunkIds = new Set(manifest.chunks.map((chunk) => chunk.id));
+  return Array.from(ids)
+    .filter((chunkId) => knownChunkIds.has(chunkId))
+    .sort((left, right) => left - right);
+}
+
+function parseChunkLine(line: string): PartItem | null {
+  if (!line.trim()) {
+    return null;
+  }
+
+  const parsed = JSON.parse(line) as Record<string, unknown>;
+  const partNumber = String(parsed.partNumber ?? '').toUpperCase();
+  if (!partNumber) {
+    return null;
+  }
+  if (!isAllowedPartNumber(partNumber)) {
+    return null;
+  }
+  if (isExcludedPartNumber(partNumber)) {
+    return null;
+  }
+
+  const availabilityFromRoot = parsed.availability as Availability | undefined;
+  const enrichment = parsed.enrichment as Record<string, unknown> | undefined;
+  const availabilityFromEnrichment = enrichment?.availability as Availability | undefined;
+  const availability = availabilityFromRoot ?? availabilityFromEnrichment ?? { status: 'unknown', label: 'Unknown' };
+  const enrichmentPrice = enrichment?.price;
+  const normalizedEnrichmentPrice = typeof enrichmentPrice === 'string' ? enrichmentPrice : undefined;
+
+  return {
+    partNumber,
+    name: String(parsed.name ?? ''),
+    price: typeof parsed.price === 'string' ? parsed.price : normalizedEnrichmentPrice,
+    url: String(parsed.url ?? ''),
+    availability,
+  };
+}
+
+async function loadChunkById(chunkId: number, manifest: ChunkManifest): Promise<PartItem[]> {
+  const cached = chunkCache.get(chunkId);
+  if (cached) {
+    return cached;
+  }
+
+  const chunkMeta = manifest.chunks.find((chunk) => chunk.id === chunkId);
+  if (!chunkMeta) {
+    return [];
+  }
+
+  const response = await fetch(`${chunksBasePath}/${chunkMeta.file}`);
+  if (!response.ok) {
+    throw new Error(`Failed to load chunk ${chunkMeta.file} (${response.status})`);
+  }
+
+  const text = await response.text();
+  const records = text
+    .split(/\r?\n/)
+    .map((line) => parseChunkLine(line))
+    .filter((item): item is PartItem => Boolean(item));
+
+  chunkCache.set(chunkId, records);
+  return records;
+}
+
+async function loadInitialChunk(): Promise<void> {
+  setStatus(`loading catalog (${allowedPartPrefixes.join('|')})...`);
+
   try {
-    const [snapshot, priceSnapshot] = await Promise.all([loadSnapshot(), loadPriceSnapshot()]);
-    const mergedSnapshot: PartsSnapshot = {
-      ...snapshot,
-      items: snapshot.items.map((item) => {
-        const priceEntry = priceSnapshot.prices[item.partNumber];
-        if (priceEntry?.price || priceEntry?.availability) {
-          return {
-            ...item,
-            price: priceEntry.price ?? item.price,
-            availability: priceEntry.availability ?? item.availability,
-          };
+    const { manifest, map } = await loadChunkArtifacts();
+    const chunkIds = getCatalogChunkIds(manifest, map);
+    if (chunkIds.length === 0) {
+      initialChunkItems = [];
+      clearResultState();
+      setStatus(`No chunks found for ${allowedPartPrefixes.join('|')}`);
+      return;
+    }
+
+    const chunkResults = await Promise.all(chunkIds.map((chunkId) => loadChunkById(chunkId, manifest)));
+    const mergedByPartNumber = new Map<string, PartItem>();
+    for (const records of chunkResults) {
+      for (const item of records) {
+        if (!mergedByPartNumber.has(item.partNumber)) {
+          mergedByPartNumber.set(item.partNumber, item);
         }
-        return item;
-      }),
-    };
+      }
+    }
 
-    applySnapshot(mergedSnapshot);
-
-    console.table(
-      allItems.map((item) => {
-        const availability = getAvailability(item);
-        return {
-          partNumber: item.partNumber,
-          name: item.name,
-          price: item.price ?? '',
-          availability: availability.label,
-          url: item.url,
-        };
-      }),
-    );
+    initialChunkItems = Array.from(mergedByPartNumber.values());
+    showInitialChunkResults('done');
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
+    clearResultState();
     setStatus(`error: ${message}`);
-    allItems = [];
-    currentPage = 1;
-    renderCurrentPage();
-    console.error('Failed to load local snapshot', error);
+    console.error('Catalog load failed', error);
   }
 }
 
@@ -392,7 +526,12 @@ async function syncAndReload(): Promise<void> {
       throw new Error(`Price sync failed (${priceResponse.status})`);
     }
 
-    await loadPartsFromLocal();
+    setStatus('sync done. Re-run chunk:index for fresh search index.');
+    chunkCache.clear();
+    chunkManifestCache = null;
+    chunkMapCache = null;
+    initialChunkItems = [];
+    await loadInitialChunk();
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     setStatus(`error: ${message}`);
@@ -446,12 +585,22 @@ inStockOnlyCheckbox.addEventListener('change', () => {
   inStockOnly = inStockOnlyCheckbox.checked;
   currentPage = 1;
   renderCurrentPage();
+  const visibleCount = getVisibleItems().length;
+  if (allItems.length > 0) {
+    setStatus(`done: ${visibleCount}/${allItems.length}`);
+  }
+});
+
+searchInput.addEventListener('input', () => {
+  searchQuery = searchInput.value;
+  currentPage = 1;
+  renderCurrentPage();
   if (allItems.length > 0) {
     const visibleCount = getVisibleItems().length;
-    const generatedLabel = generatedAt ? new Date(generatedAt).toLocaleString() : 'n/a';
-    setStatus(`done: ${visibleCount}/${allItems.length} (sync: ${generatedLabel})`);
+    setStatus(`done: ${visibleCount}/${allItems.length}`);
   }
 });
 
 updateSortButtonLabels();
-void loadPartsFromLocal();
+renderCurrentPage({ triggerLazy: false });
+void loadInitialChunk();

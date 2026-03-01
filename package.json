@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "sync:parts": "node scripts/sync-parts.mjs",
-    "sync:prices": "node scripts/sync-prices.mjs",
-    "sync:all": "npm run sync:parts && npm run sync:prices",
-    "build": "npm run sync:parts && tsc && vite build",
+    "build:data": "node scripts/build-data.mjs",
+    "migrate": "tsc --target ES2022 --module NodeNext --moduleResolution NodeNext --outDir .tmp/migrate scripts/migrate-to-ndjson.ts && node .tmp/migrate/migrate-to-ndjson.js",
+    "chunk:index": "tsc --target ES2022 --module NodeNext --moduleResolution NodeNext --outDir .tmp/migrate scripts/chunk-ndjson.ts && node .tmp/migrate/chunk-ndjson.js --vehicleKey default",
+    "build": "npm run build:data && tsc && vite build",
     "preview": "vite preview"
   },
   "devDependencies": {

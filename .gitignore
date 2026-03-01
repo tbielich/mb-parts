@@ -1,3 +1,12 @@
 node_modules/
 dist/
 .DS_Store
+.tmp/
+data/
+public/data/vehicles/
+public/data/parts-base.json
+public/data/parts-price.json
+public/data/parts-price-state.json
+public/data/parts.yaml
+public/data/parts-base.yaml
+public/data/parts.json

@@ -1,1206 +1,1094 @@
 {
-  "updatedAt": "2026-02-27T19:07:40.205Z",
-  "count": 150,
+  "updatedAt": "2026-03-01T09:32:31.457Z",
+  "count": 136,
   "prices": {
-    "A0000000000": {
-      "price": "1,76 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000000300": {
-      "price": "150,36 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:02:45.917Z"
-    },
-    "A0000002700": {
-      "price": "100,72 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000002800": {
-      "price": "159,52 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000002900": {
-      "price": "184,72 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000003000": {
-      "price": "100,72 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000003100": {
-      "price": "197,31 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000003200": {
-      "price": "184,72 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000003300": {
-      "price": "110,04 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000003400": {
-      "price": "201,52 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000004200": {
-      "price": "75,52 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000005800": {
-      "price": "117,51 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000005900": {
-      "price": "159,52 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000006000": {
-      "price": "117,51 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000006100": {
-      "price": "113,31 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000006300": {
-      "price": "193,11 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000006500": {
-      "price": "151,12 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000008300": {
-      "price": "153,64 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000008600": {
-      "price": "226,72 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000008700": {
-      "price": "125,92 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000008800": {
-      "price": "159,52 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000008900": {
-      "price": "92,31 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000009000": {
-      "price": "125,92 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000009300": {
-      "price": "83,92 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000009600": {
-      "price": "125,92 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000011200": {
-      "price": "120,87 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000013400": {
-      "price": "155,32 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000013500": {
-      "price": "226,72 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000013700": {
-      "price": "120,87 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000016300": {
-      "price": "209,92 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000016400": {
-      "price": "151,12 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000016500": {
-      "price": "67,11 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000016700": {
-      "price": "83,92 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000017000": {
-      "price": "163,71 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000017400": {
-      "price": "151,12 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000017500": {
-      "price": "75,52 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000017600": {
-      "price": "167,91 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000017700": {
-      "price": "100,72 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000020800": {
-      "price": "100,72 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000020900": {
-      "price": "155,32 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000022100": {
-      "price": "302,32 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000033600": {
-      "price": "92,31 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000036200": {
-      "price": "86,44 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000036300": {
-      "price": "180,52 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000036400": {
-      "price": "156,16 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000036500": {
-      "price": "156,16 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000036600": {
-      "price": "92,31 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000036900": {
-      "price": "180,52 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000037000": {
-      "price": "125,92 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000040200": {
-      "price": "260,32 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:03.340Z"
-    },
-    "A0000055500": {
-      "price": "71,31 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000055600": {
-      "price": "130,12 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000055700": {
-      "price": "79,72 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000055800": {
-      "price": "176,32 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000055900": {
-      "price": "125,92 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000056100": {
-      "price": "167,91 €*",
-      "availability": {
-        "status": "unknown",
-        "label": "Unknown"
-      },
-      "updatedAt": "2026-02-27T19:07:38.915Z"
-    },
-    "A0000056200": {
-      "price": "96,51 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000071500": {
-      "price": "92,31 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000072600": {
-      "price": "159,52 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000100008": {
-      "price": "6.524,70 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000100030": {
-      "price": "627,52 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000100127": {
-      "price": "466,85 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000100172": {
-      "price": "59,55 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000100301": {
-      "price": "2,19 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A000010030164": {
-      "price": "2,19 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000100420": {
-      "price": "2.999,26 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000100520": {
-      "price": "7.151,08 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000100551": {
-      "price": "223,28 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000100651": {
-      "price": "437,43 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000101051": {
-      "price": "134,62 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000101272": {
-      "price": "76,78 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000101285": {
-      "price": "9,17 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A000010128564": {
-      "price": "9,17 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000101301": {
-      "price": "9,41 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000101351": {
-      "price": "126,50 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A000010135164": {
-      "price": "126,50 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000101385": {
-      "price": "9,21 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A000010138564": {
-      "price": "8,41 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000101401": {
-      "price": "201,53 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000101451": {
-      "price": "403,76 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000101485": {
-      "price": "9,17 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A000010148564": {
-      "price": "9,17 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000101501": {
-      "price": "20,15 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000101551": {
-      "price": "427,90 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000101585": {
-      "price": "9,44 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A000010158564": {
-      "price": "9,44 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000101651": {
-      "price": "520,46 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A000010165164": {
-      "price": "428,89 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000101685": {
-      "price": "5,46 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A000010168564": {
-      "price": "5,46 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000104751": {
-      "price": "401,68 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A000010475167": {
-      "price": "378,94 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000104851": {
-      "price": "478,46 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A000010485164": {
-      "price": "477,06 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000110000": {
-      "price": "2,34 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000110026": {
-      "price": "33,24 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000110035": {
-      "price": "4,08 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000110036": {
-      "price": "5,32 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000110100": {
-      "price": "2,36 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A000011010064": {
-      "price": "2,36 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:11.049Z"
-    },
-    "A0000110136": {
-      "price": "5,24 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000110200": {
-      "price": "3,57 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000110236": {
-      "price": "5,24 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000110300": {
-      "price": "5,13 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000110400": {
-      "price": "8,60 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000110700": {
-      "price": "2,08 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000110800": {
-      "price": "2,38 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000111000": {
-      "price": "5,01 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000120014": {
-      "price": "62,61 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000140033": {
-      "price": "2,24 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000140071": {
-      "price": "31,24 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000140133": {
-      "price": "1,38 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000150000": {
-      "price": "8,41 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000150045": {
-      "price": "144,93 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000150130": {
-      "price": "50,90 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000150200": {
-      "price": "4,13 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000150201": {
-      "price": "628,33 €*",
-      "availability": {
-        "status": "out_of_stock",
-        "label": "Ausverkauft"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000150230": {
+    "A3092400026": {
       "price": "23,30 €*",
       "availability": {
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
+      "updatedAt": "2026-03-01T09:32:02.742Z"
     },
-    "A0000150245": {
-      "price": "144,93 €*",
+    "A3092400076": {
+      "price": "34,16 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092401206": {
+      "price": "137,29 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092401306": {
+      "price": "137,29 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092410162": {
+      "price": "21,91 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092410413": {
+      "price": "56,17 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092420035": {
+      "price": "18,05 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092600045": {
+      "price": "934,20 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092600050": {
+      "price": "237,24 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092600150": {
+      "price": "127,21 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092600195": {
+      "price": "31,88 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092601182": {
+      "price": "101,91 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092605937": {
+      "price": "45,86 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092606037": {
+      "price": "25,66 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092606137": {
+      "price": "27,19 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092610780": {
+      "price": "11,85 €*",
       "availability": {
         "status": "in_stock",
         "label": "In stock"
       },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
+      "updatedAt": "2026-03-01T09:32:02.742Z"
     },
-    "A0000150300": {
-      "price": "8,41 €*",
+    "A3092610880": {
+      "price": "3,68 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092620026": {
+      "price": "54,18 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092620093": {
+      "price": "2,01 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092620151": {
+      "price": "14,10 €*",
       "availability": {
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
+      "updatedAt": "2026-03-01T09:32:02.742Z"
     },
-    "A0000150401": {
-      "price": "647,29 €*",
+    "A3092620194": {
+      "price": "3,53 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092620394": {
+      "price": "3,53 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092620594": {
+      "price": "3,53 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092650093": {
+      "price": "6,78 €*",
       "availability": {
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
+      "updatedAt": "2026-03-01T09:32:02.742Z"
     },
-    "A0000150530": {
-      "price": "28,19 €*",
+    "A3092650102": {
+      "price": "570,11 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092670025": {
+      "price": "14,23 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092670274": {
+      "price": "63,88 €*",
       "availability": {
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
+      "updatedAt": "2026-03-01T09:32:02.742Z"
     },
-    "A0000150600": {
-      "price": "4,15 €*",
+    "A3092670311": {
+      "price": "20,05 €*",
       "availability": {
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
+      "updatedAt": "2026-03-01T09:32:02.742Z"
     },
-    "A0000150700": {
+    "A3092670322": {
       "price": "4,47 €*",
       "availability": {
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
+      "updatedAt": "2026-03-01T09:32:02.742Z"
     },
-    "A0000150900": {
-      "price": "4,47 €*",
+    "A3092670341": {
+      "price": "204,83 €*",
       "availability": {
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
+      "updatedAt": "2026-03-01T09:32:02.742Z"
     },
-    "A0000150930": {
-      "price": "13,88 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000151000": {
-      "price": "4,15 €*",
+    "A3092670441": {
+      "price": "21,42 €*",
       "availability": {
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
+      "updatedAt": "2026-03-01T09:32:02.742Z"
     },
-    "A0000151200": {
-      "price": "13,38 €*",
+    "A3092670574": {
+      "price": "80,29 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A309267064702": {
+      "price": "6,16 €*",
       "availability": {
         "status": "in_stock",
         "label": "In stock"
       },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
+      "updatedAt": "2026-03-01T09:32:02.742Z"
     },
-    "A0000151500": {
+    "A3092670774": {
+      "price": "10,57 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092670859": {
+      "price": "70,25 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092670917": {
+      "price": "9,71 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092670950": {
+      "price": "3,84 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092671050": {
+      "price": "3,94 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092671117": {
+      "price": "114,66 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092671317": {
+      "price": "13,09 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092671502": {
+      "price": "34,94 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092700320": {
+      "price": "1.314,88 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092900839": {
+      "price": "26,50 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092901016": {
+      "price": "168,44 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092901333": {
+      "price": "354,55 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092901639": {
+      "price": "253,78 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092903619": {
+      "price": "807,89 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092930074": {
+      "price": "69,77 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092930111": {
+      "price": "195,78 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3092931210": {
+      "price": "194,37 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:02.742Z"
+    },
+    "A3093000132": {
+      "price": "72,07 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093000304": {
+      "price": "119,54 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093000430": {
+      "price": "42,69 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093001015": {
+      "price": "80,04 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093001304": {
+      "price": "20,05 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093010022": {
+      "price": "3,00 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093011315": {
+      "price": "30,77 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093011515": {
+      "price": "30,77 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093020050": {
+      "price": "5,60 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093100277": {
+      "price": "135,77 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093100777": {
+      "price": "280,80 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093100977": {
+      "price": "59,50 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093101522": {
+      "price": "519,49 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093101563": {
+      "price": "59,05 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093110184": {
+      "price": "10,19 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093110663": {
+      "price": "52,68 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093110684": {
+      "price": "6,37 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093111863": {
+      "price": "15,27 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093150031": {
+      "price": "2,43 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093150037": {
+      "price": "134,29 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093150040": {
+      "price": "56,39 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093150306": {
+      "price": "36,77 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093200047": {
+      "price": "155,58 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093200073": {
+      "price": "12,17 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A309320007302": {
+      "price": "12,17 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A309320007364": {
+      "price": "12,17 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093200093": {
+      "price": "410,24 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093200177": {
+      "price": "40,58 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093200228": {
+      "price": "160,03 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093200270": {
+      "price": "119,82 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093200356": {
+      "price": "192,77 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093200428": {
+      "price": "206,95 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093200570": {
+      "price": "179,74 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093200675": {
+      "price": "89,76 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093201102": {
+      "price": "548,22 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093201202": {
+      "price": "593,88 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093203406": {
+      "price": "1.142,16 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093206506": {
+      "price": "896,20 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093220050": {
+      "price": "33,43 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093230285": {
+      "price": "26,49 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093230385": {
+      "price": "13,32 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093230440": {
+      "price": "10,08 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093250040": {
+      "price": "2,38 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093250042": {
+      "price": "3,02 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093250162": {
+      "price": "15,16 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093250331": {
+      "price": "32,87 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093250574": {
+      "price": "23,55 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093260281": {
+      "price": "9,65 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093260347": {
+      "price": "44,04 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3093260481": {
+      "price": "10,39 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:28.325Z"
+    },
+    "A3095001702": {
+      "price": "577,35 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095011382": {
+      "price": "85,22 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095011682": {
+      "price": "44,68 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095012282": {
+      "price": "45,11 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095013782": {
+      "price": "59,67 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095052055": {
+      "price": "53,78 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095060135": {
+      "price": "13,76 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095061235": {
+      "price": "45,10 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095062435": {
+      "price": "15,76 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095201501": {
+      "price": "17,39 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095202641": {
+      "price": "103,47 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095280008": {
+      "price": "118,98 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095280039": {
+      "price": "38,43 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095280208": {
+      "price": "55,07 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095280308": {
+      "price": "93,45 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095280408": {
+      "price": "55,07 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095281008": {
+      "price": "74,66 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095282008": {
+      "price": "122,33 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095283108": {
+      "price": "145,49 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095420089": {
+      "price": "2,53 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095810046": {
+      "price": "50,30 €*",
+      "availability": {
+        "status": "in_stock",
+        "label": "In stock"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095840096": {
+      "price": "23,80 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095840197": {
+      "price": "31,65 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095840297": {
+      "price": "31,65 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095841595": {
+      "price": "8,64 €*",
+      "availability": {
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
+      },
+      "updatedAt": "2026-03-01T09:32:31.457Z"
+    },
+    "A3095842295": {
       "price": "5,75 €*",
       "availability": {
-        "status": "in_stock",
-        "label": "In stock"
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
       },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
+      "updatedAt": "2026-03-01T09:32:31.457Z"
     },
-    "A0000151600": {
-      "price": "4,47 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000151700": {
-      "price": "4,78 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000160000": {
-      "price": "12,96 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A000016000064": {
-      "price": "12,96 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000160030": {
-      "price": "30,75 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000160069": {
-      "price": "22,84 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000160134": {
-      "price": "37,22 €*",
+    "A3095842395": {
+      "price": "23,80 €*",
       "availability": {
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
+      "updatedAt": "2026-03-01T09:32:31.457Z"
     },
-    "A0000160169": {
-      "price": "27,70 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000160200": {
-      "price": "16,16 €*",
+    "A3095846596": {
+      "price": "38,08 €*",
       "availability": {
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
+      "updatedAt": "2026-03-01T09:32:31.457Z"
     },
-    "A000016020027": {
-      "price": "16,16 €*",
+    "A3095847696": {
+      "price": "38,08 €*",
       "availability": {
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
+      "updatedAt": "2026-03-01T09:32:31.457Z"
     },
-    "A000016020064": {
-      "price": "14,65 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000160234": {
-      "price": "16,05 €*",
+    "A3095848296": {
+      "price": "31,65 €*",
       "availability": {
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
+      "updatedAt": "2026-03-01T09:32:31.457Z"
     },
-    "A0000160300": {
-      "price": "35,35 €*",
+    "A3095848696": {
+      "price": "31,65 €*",
       "availability": {
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
+      "updatedAt": "2026-03-01T09:32:31.457Z"
     },
-    "A0000160320": {
-      "price": "134,52 €*",
+    "A3095848796": {
+      "price": "5,75 €*",
       "availability": {
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
+      "updatedAt": "2026-03-01T09:32:31.457Z"
     },
-    "A0000160321": {
-      "price": "57,35 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000160400": {
-      "price": "35,58 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000160421": {
-      "price": "43,40 €*",
-      "availability": {
-        "status": "in_stock",
-        "label": "In stock"
-      },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
-    },
-    "A0000160569": {
-      "price": "12,17 €*",
+    "A3095849196": {
+      "price": "31,65 €*",
       "availability": {
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
+      "updatedAt": "2026-03-01T09:32:31.457Z"
     },
-    "A000016056964": {
-      "price": "12,17 €*",
+    "A3095849296": {
+      "price": "31,65 €*",
       "availability": {
-        "status": "in_stock",
-        "label": "In stock"
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
       },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
+      "updatedAt": "2026-03-01T09:32:31.457Z"
     },
-    "A0000160600": {
-      "price": "15,15 €*",
+    "A3095849396": {
+      "price": "5,75 €*",
       "availability": {
-        "status": "in_stock",
-        "label": "In stock"
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
       },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
+      "updatedAt": "2026-03-01T09:32:31.457Z"
     },
-    "A0000160800": {
-      "price": "13,16 €*",
+    "A3095849896": {
+      "price": "31,65 €*",
       "availability": {
-        "status": "unknown",
-        "label": "Unknown"
+        "status": "out_of_stock",
+        "label": "Ausverkauft"
       },
-      "updatedAt": "2026-02-27T19:07:40.205Z"
+      "updatedAt": "2026-03-01T09:32:31.457Z"
     }
   }
 }

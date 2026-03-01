@@ -48,6 +48,22 @@ body {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  min-width: 260px;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.65rem;
+  font: inherit;
+  color: var(--text);
+  background: var(--card);
+}
+
+.search-input:focus {
+  outline: 2px solid color-mix(in srgb, var(--accent) 45%, white);
+  outline-offset: 1px;
 }
 
 .filter-toggle {
@@ -226,6 +242,11 @@ a:hover {
   .toolbar-actions {
     width: 100%;
     justify-content: space-between;
+  }
+
+  .search-input {
+    width: 100%;
+    min-width: 0;
   }
 
   .pagination {
