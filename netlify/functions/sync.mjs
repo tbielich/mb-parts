@@ -5,7 +5,7 @@ import {
   jsonResponse,
   parseLimit,
   parsePrefixes,
-  readBaseSnapshot,
+  readBaseSnapshotWithFallback,
 } from './_parts-utils.mjs';
 
 export async function handler(event) {
@@ -20,7 +20,7 @@ export async function handler(event) {
     const effectivePrefixes = prefixes.length > 0 ? prefixes : DEFAULT_PREFIXES;
     const limit = parseLimit(url.searchParams.get('limit'));
 
-    const snapshot = await readBaseSnapshot();
+    const snapshot = await readBaseSnapshotWithFallback(event);
     const items = filterSnapshotItems(snapshot.items, effectivePrefixes, limit);
 
     return jsonResponse(200, {

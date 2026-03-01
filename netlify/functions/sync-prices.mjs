@@ -7,7 +7,7 @@ import {
   normalizePartNumber,
   parseBatch,
   parseJsonBody,
-  readBaseSnapshot,
+  readBaseSnapshotWithFallback,
 } from './_parts-utils.mjs';
 
 let cursor = 0;
@@ -25,7 +25,7 @@ export async function handler(event) {
     const batchSize = parseBatch(url.searchParams.get('batch'), 100, 300);
     const body = parseJsonBody(event);
 
-    const snapshot = await readBaseSnapshot();
+    const snapshot = await readBaseSnapshotWithFallback(event);
     const baseItems = filterSnapshotItems(snapshot.items, DEFAULT_PREFIXES, Number.MAX_SAFE_INTEGER);
     if (baseItems.length === 0) {
       return jsonResponse(200, { ok: true, updated: 0, pricedCount: 0, nextCursor: 0, entries: {} });

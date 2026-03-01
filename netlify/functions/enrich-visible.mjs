@@ -5,7 +5,7 @@ import {
   jsonResponse,
   normalizePartNumber,
   parseJsonBody,
-  readBaseSnapshot,
+  readBaseSnapshotWithFallback,
 } from './_parts-utils.mjs';
 
 export async function handler(event) {
@@ -17,7 +17,7 @@ export async function handler(event) {
     const body = parseJsonBody(event);
     const requestedPartNumbers = Array.isArray(body.partNumbers) ? body.partNumbers : [];
 
-    const snapshot = await readBaseSnapshot();
+    const snapshot = await readBaseSnapshotWithFallback(event);
     const baseItems = filterSnapshotItems(snapshot.items, DEFAULT_PREFIXES, Number.MAX_SAFE_INTEGER);
     const byPartNumber = new Map(baseItems.map((item) => [item.partNumber, item]));
 

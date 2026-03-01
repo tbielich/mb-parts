@@ -61,6 +61,52 @@ export async function readBaseSnapshot() {
   return JSON.parse(raw);
 }
 
+function resolveSiteOrigin(event) {
+  if (event?.rawUrl) {
+    try {
+      return new URL(event.rawUrl).origin;
+    } catch {
+      // ignore
+    }
+  }
+
+  const headers = event?.headers ?? {};
+  const host = headers['x-forwarded-host'] ?? headers.host;
+  const proto = headers['x-forwarded-proto'] ?? 'https';
+  if (host) {
+    return `${proto}://${host}`;
+  }
+
+  if (process.env.URL) {
+    return process.env.URL;
+  }
+
+  throw new Error('Unable to resolve site origin');
+}
+
+export async function readBaseSnapshotWithFallback(event) {
+  try {
+    return await readBaseSnapshot();
+  } catch (error) {
+    if (!(error instanceof Error) || !error.message.includes('ENOENT')) {
+      throw error;
+    }
+  }
+
+  const origin = resolveSiteOrigin(event);
+  const snapshotUrl = new URL('/data/parts-base.json', origin).toString();
+  const response = await fetch(snapshotUrl, {
+    headers: {
+      Accept: 'application/json',
+      'User-Agent': 'mb-parts-netlify/1.0',
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to load snapshot over HTTP (${response.status})`);
+  }
+  return response.json();
+}
+
 export function filterSnapshotItems(items, prefixes, limit) {
   const effectivePrefixes = prefixes.length > 0 ? prefixes : DEFAULT_PREFIXES;
   const dedup = new Map();
