@@ -28,6 +28,22 @@ type EnrichVisibleResponse = {
   >;
 };
 
+type SyncBaseResponse = {
+  ok: boolean;
+  prefixes?: string[];
+  count?: number;
+  generatedAt?: string;
+  items?: Array<Record<string, unknown>>;
+};
+
+type SyncPricesResponse = {
+  ok: boolean;
+  updated: number;
+  pricedCount?: number;
+  nextCursor?: number;
+  entries?: EnrichVisibleResponse['entries'];
+};
+
 type ChunkMeta = {
   id: number;
   file: string;
@@ -373,6 +389,58 @@ function showInitialChunkResults(statusPrefix = 'done'): void {
   );
 }
 
+function normalizePartRecord(parsed: Record<string, unknown>): PartItem | null {
+  const partNumber = String(parsed.partNumber ?? '').toUpperCase();
+  if (!partNumber) {
+    return null;
+  }
+  if (!isAllowedPartNumber(partNumber)) {
+    return null;
+  }
+  if (isExcludedPartNumber(partNumber)) {
+    return null;
+  }
+
+  const availabilityFromRoot = parsed.availability as Availability | undefined;
+  const enrichment = parsed.enrichment as Record<string, unknown> | undefined;
+  const availabilityFromEnrichment = enrichment?.availability as Availability | undefined;
+  const availability = availabilityFromRoot ?? availabilityFromEnrichment ?? { status: 'unknown', label: 'Unknown' };
+  const enrichmentPrice = enrichment?.price;
+  const normalizedEnrichmentPrice = typeof enrichmentPrice === 'string' ? enrichmentPrice : undefined;
+
+  return {
+    partNumber,
+    name: String(parsed.name ?? ''),
+    price: typeof parsed.price === 'string' ? parsed.price : normalizedEnrichmentPrice,
+    url: String(parsed.url ?? ''),
+    availability,
+  };
+}
+
+function applyEnrichmentEntries(entries: EnrichVisibleResponse['entries'] | undefined): void {
+  if (!entries) {
+    return;
+  }
+
+  const applyTo = (items: PartItem[]) => {
+    for (const item of items) {
+      const entry = entries[item.partNumber];
+      if (!entry) {
+        continue;
+      }
+      if (entry.price) {
+        item.price = entry.price;
+      }
+      if (entry.availability) {
+        item.availability = entry.availability;
+      }
+    }
+  };
+
+  applyTo(allItems);
+  applyTo(initialChunkItems);
+}
+
 async function loadChunkArtifacts(): Promise<{ manifest: ChunkManifest; map: ChunkMap }> {
   if (chunkManifestCache && chunkMapCache) {
     return { manifest: chunkManifestCache, map: chunkMapCache };
@@ -419,31 +487,7 @@ function parseChunkLine(line: string): PartItem | null {
   }
 
   const parsed = JSON.parse(line) as Record<string, unknown>;
-  const partNumber = String(parsed.partNumber ?? '').toUpperCase();
-  if (!partNumber) {
-    return null;
-  }
-  if (!isAllowedPartNumber(partNumber)) {
-    return null;
-  }
-  if (isExcludedPartNumber(partNumber)) {
-    return null;
-  }
-
-  const availabilityFromRoot = parsed.availability as Availability | undefined;
-  const enrichment = parsed.enrichment as Record<string, unknown> | undefined;
-  const availabilityFromEnrichment = enrichment?.availability as Availability | undefined;
-  const availability = availabilityFromRoot ?? availabilityFromEnrichment ?? { status: 'unknown', label: 'Unknown' };
-  const enrichmentPrice = enrichment?.price;
-  const normalizedEnrichmentPrice = typeof enrichmentPrice === 'string' ? enrichmentPrice : undefined;
-
-  return {
-    partNumber,
-    name: String(parsed.name ?? ''),
-    price: typeof parsed.price === 'string' ? parsed.price : normalizedEnrichmentPrice,
-    url: String(parsed.url ?? ''),
-    availability,
-  };
+  return normalizePartRecord(parsed);
 }
 
 async function loadChunkById(chunkId: number, manifest: ChunkManifest): Promise<PartItem[]> {
@@ -514,24 +558,58 @@ async function syncAndReload(): Promise<void> {
     const baseResponse = await fetch(`/api/sync?${prefixParam}limit=all`, {
       method: 'POST',
     });
+    if (baseResponse.status === 404) {
+      setStatus('error: Sync API not available in this deployment (local dev only).');
+      return;
+    }
     if (!baseResponse.ok) {
       throw new Error(`Base sync failed (${baseResponse.status})`);
     }
 
+    const basePayload = (await baseResponse.json()) as SyncBaseResponse;
+    const syncItemsRaw = Array.isArray(basePayload.items) ? basePayload.items : [];
+    const syncItems = syncItemsRaw
+      .map((item) => normalizePartRecord(item))
+      .filter((item): item is PartItem => Boolean(item));
+
+    if (syncItems.length > 0) {
+      initialChunkItems = syncItems;
+      showInitialChunkResults('done');
+    }
+
     setStatus('syncing prices...');
-    const priceResponse = await fetch('/api/sync-prices?batch=500', {
+    const priceTargets = allItems.slice(0, 200).map((item) => item.partNumber);
+    const priceResponse = await fetch('/api/sync-prices?batch=200', {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ partNumbers: priceTargets }),
     });
+    if (priceResponse.status === 404) {
+      setStatus('error: Sync Prices API not available in this deployment (local dev only).');
+      return;
+    }
     if (!priceResponse.ok) {
       throw new Error(`Price sync failed (${priceResponse.status})`);
     }
 
-    setStatus('sync done. Re-run chunk:index for fresh search index.');
-    chunkCache.clear();
-    chunkManifestCache = null;
-    chunkMapCache = null;
-    initialChunkItems = [];
-    await loadInitialChunk();
+    const pricePayload = (await priceResponse.json()) as SyncPricesResponse;
+    applyEnrichmentEntries(pricePayload.entries);
+    if (sortKey === 'price' || sortKey === 'availability') {
+      applySort(allItems);
+    }
+    renderCurrentPage();
+
+    if (syncItems.length > 0) {
+      const visibleCount = getVisibleItems().length;
+      setStatus(`sync done: ${visibleCount}/${allItems.length}`);
+    } else {
+      setStatus('sync done. Re-run chunk:index for fresh search index.');
+      chunkCache.clear();
+      chunkManifestCache = null;
+      chunkMapCache = null;
+      initialChunkItems = [];
+      await loadInitialChunk();
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     setStatus(`error: ${message}`);

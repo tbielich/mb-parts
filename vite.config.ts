@@ -1008,6 +1008,7 @@ export default defineConfig({
                   prefixes: snapshot.prefixes,
                   count: snapshot.count,
                   generatedAt: snapshot.generatedAt,
+                  items: snapshot.items,
                 }),
               );
             } catch (error) {
