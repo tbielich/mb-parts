@@ -1089,6 +1089,14 @@ async function syncPriceBatch(batchSize: number): Promise<{ updated: number; pri
 }
 
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(process.cwd(), 'index.html'),
+        groups: resolve(process.cwd(), 'groups.html'),
+      },
+    },
+  },
   server: {
     middlewareMode: false,
   },

@@ -111,6 +111,23 @@ button:disabled {
   cursor: not-allowed;
 }
 
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.8rem;
+  background: var(--card);
+  color: var(--text);
+  text-decoration: none;
+  font: inherit;
+}
+
+.nav-link:hover {
+  border-color: var(--accent);
+  text-decoration: none;
+}
+
 .status,
 .status-banner {
   font-family: var(--ui-font);

@@ -6,10 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build:data": "node scripts/build-data.mjs",
+    "import:diagrams": "node scripts/import-diagram-mapping.mjs",
     "migrate": "tsc --target ES2022 --module NodeNext --moduleResolution NodeNext --outDir .tmp/migrate scripts/migrate-to-ndjson.ts && node .tmp/migrate/migrate-to-ndjson.js",
     "chunk:index": "tsc --target ES2022 --module NodeNext --moduleResolution NodeNext --outDir .tmp/migrate scripts/chunk-ndjson.ts && node .tmp/migrate/chunk-ndjson.js --vehicleKey default",
     "build": "npm run build:data && tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "generate:ikea-svg": "node scripts/generate-ikea-svg.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",
