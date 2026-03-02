@@ -134,6 +134,11 @@ function normalizeGroupLabel(value: string | undefined): string {
     .replace(/\b\p{L}/gu, (char) => char.toUpperCase());
 }
 
+function isHiddenGroupLabel(label: string): boolean {
+  const normalized = normalizeText(label).toLowerCase().replace(/\s+/g, '-');
+  return normalized === 'sa-verzeichnis';
+}
+
 function normalizePrice(value: string | undefined): string {
   const raw = normalizeText(value);
   if (!raw) {
@@ -360,7 +365,12 @@ function renderNavigation(subgroups: Map<string, SubgroupView>, groupMeta: Recor
     byGroup.set(view.group, list);
   }
 
-  const sortedGroups = Array.from(byGroup.keys()).sort((a, b) => Number.parseInt(a, 10) - Number.parseInt(b, 10));
+  const sortedGroups = Array.from(byGroup.keys())
+    .filter((groupCode) => {
+      const label = normalizeGroupLabel(groupMeta[groupCode]);
+      return !isHiddenGroupLabel(label);
+    })
+    .sort((a, b) => Number.parseInt(a, 10) - Number.parseInt(b, 10));
 
   groupList.innerHTML = sortedGroups
     .map((groupCode) => {
