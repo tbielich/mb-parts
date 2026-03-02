@@ -272,7 +272,7 @@ function getPageCount(): number {
 }
 
 function updatePaginationControls(pageCount: number): void {
-  pageInfo.textContent = pageCount === 0 ? 'Page 0 / 0' : `Page ${currentPage} / ${pageCount}`;
+  pageInfo.textContent = pageCount === 0 ? 'Seite 0 / 0' : `Seite ${currentPage} / ${pageCount}`;
 
   prevPageButton.disabled = pageCount === 0 || currentPage <= 1;
   nextPageButton.disabled = pageCount === 0 || currentPage >= pageCount;
@@ -297,6 +297,7 @@ function renderTable(items: PartItem[]): void {
       const availabilityCell = isLazyLoading
         ? '<span class="skeleton skeleton-pill" aria-label="Loading availability"></span>'
         : `<span class="${badgeClass}">${escapeHtml(availability.label)}</span>`;
+      const linkLabel = `${item.partNumber} in neuem Tab öffnen`;
 
       return `
         <tr>
@@ -304,7 +305,7 @@ function renderTable(items: PartItem[]): void {
           <td data-label="Name">${escapeHtml(name)}</td>
           <td data-label="Preis">${priceCell}</td>
           <td data-label="Verfügbarkeit">${availabilityCell}</td>
-          <td data-label="Link"><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Open</a></td>
+          <td data-label="Link"><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener" aria-label="${escapeHtml(linkLabel)}" title="${escapeHtml(linkLabel)}">Prüfen</a></td>
         </tr>
       `;
     })
@@ -415,7 +416,7 @@ function applyResultItems(items: PartItem[]): void {
   renderCurrentPage();
 }
 
-function showInitialChunkResults(statusPrefix = 'done'): void {
+function showInitialChunkResults(statusPrefix = 'fertig'): void {
   applyResultItems(initialChunkItems);
   const visibleCount = getVisibleItems().length;
   setStatus(`${statusPrefix}: ${visibleCount}/${allItems.length} (${allowedPartPrefixes.join('|')})`);
@@ -529,7 +530,7 @@ async function validateUnknownAvailability(): Promise<number> {
       applySort(allItems);
     }
     renderCurrentPage({ triggerLazy: false });
-    setStatus(`validating availability... ${processed}/${total}`);
+    setStatus(`Verfügbarkeit wird geprüft... ${processed}/${total}`);
   }
 
   return validatedTotal;
@@ -611,7 +612,7 @@ async function loadChunkById(chunkId: number, manifest: ChunkManifest): Promise<
 }
 
 async function loadInitialChunk(): Promise<void> {
-  setStatus(`loading catalog (${allowedPartPrefixes.join('|')})...`);
+  setStatus(`Katalog wird geladen (${allowedPartPrefixes.join('|')})...`);
 
   try {
     const { manifest, map } = await loadChunkArtifacts();
@@ -619,7 +620,7 @@ async function loadInitialChunk(): Promise<void> {
     if (chunkIds.length === 0) {
       initialChunkItems = [];
       clearResultState();
-      setStatus(`No chunks found for ${allowedPartPrefixes.join('|')}`);
+      setStatus(`Keine Chunks für ${allowedPartPrefixes.join('|')} gefunden`);
       return;
     }
 
@@ -636,15 +637,15 @@ async function loadInitialChunk(): Promise<void> {
     initialChunkItems = Array.from(mergedByPartNumber.values());
     showInitialChunkResults('done');
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
+    const message = error instanceof Error ? error.message : 'Unbekannter Fehler';
     clearResultState();
-    setStatus(`error: ${message}`);
+    setStatus(`Fehler: ${message}`);
     console.error('Catalog load failed', error);
   }
 }
 
 async function syncAndReload(): Promise<void> {
-  setStatus('syncing base (live)...');
+  setStatus('Basisdaten werden live synchronisiert...');
   syncButton.disabled = true;
   setInStockSyncButtonState(true);
 
@@ -656,12 +657,12 @@ async function syncAndReload(): Promise<void> {
         method: 'POST',
       });
     } catch {
-      setStatus('live sync unreachable, loading local catalog...');
+      setStatus('Live-Sync nicht erreichbar, lokaler Katalog wird geladen...');
       await loadInitialChunk();
       return;
     }
     if (baseResponse.status === 404) {
-      setStatus('live sync unavailable, loading local catalog...');
+      setStatus('Live-Sync nicht verfügbar, lokaler Katalog wird geladen...');
       await loadInitialChunk();
       return;
     }
@@ -676,7 +677,7 @@ async function syncAndReload(): Promise<void> {
       .filter((item): item is PartItem => Boolean(item));
 
     if (syncItems.length === 0) {
-      setStatus('sync done. Re-run chunk:index for fresh search index.');
+      setStatus('Sync abgeschlossen. Für einen frischen Suchindex bitte chunk:index erneut ausführen.');
       chunkCache.clear();
       chunkManifestCache = null;
       chunkMapCache = null;
@@ -687,7 +688,7 @@ async function syncAndReload(): Promise<void> {
 
     initialChunkItems = syncItems;
     applyResultItems(initialChunkItems);
-    setStatus(`syncing details (live)... 0/${allItems.length}`);
+    setStatus(`Details werden live synchronisiert... 0/${allItems.length}`);
 
     const allPartNumbers = allItems.map((item) => item.partNumber);
     const total = allPartNumbers.length;
@@ -714,7 +715,7 @@ async function syncAndReload(): Promise<void> {
         applySort(allItems);
       }
       renderCurrentPage({ triggerLazy: false });
-      setStatus(`syncing details (live)... ${processed}/${total}`);
+      setStatus(`Details werden live synchronisiert... ${processed}/${total}`);
     }
 
     if (sortKey === 'availability' || sortKey === 'price') {
@@ -725,11 +726,11 @@ async function syncAndReload(): Promise<void> {
     const visibleCount = getVisibleItems().length;
     const summary = getAvailabilitySummary(allItems);
     setStatus(
-      `sync done: ${visibleCount}/${allItems.length} (in:${summary.inStock} out:${summary.outOfStock} unknown:${summary.unknown}, validated ${validatedTotal})`,
+      `Sync abgeschlossen: ${visibleCount}/${allItems.length} (lieferbar:${summary.inStock} ausverkauft:${summary.outOfStock} unbekannt:${summary.unknown}, geprüft ${validatedTotal})`,
     );
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    setStatus(`error: ${message}`);
+    const message = error instanceof Error ? error.message : 'Unbekannter Fehler';
+    setStatus(`Fehler: ${message}`);
     console.error('Sync failed', error);
   } finally {
     syncButton.disabled = false;
@@ -752,11 +753,11 @@ inStockOnlyCheckbox.addEventListener('change', async () => {
       const visibleCount = getVisibleItems().length;
       const summary = getAvailabilitySummary(allItems);
       setStatus(
-        `done: ${visibleCount}/${allItems.length} (in:${summary.inStock} out:${summary.outOfStock} unknown:${summary.unknown}, filter hides only out_of_stock)`,
+        `Fertig: ${visibleCount}/${allItems.length} (lieferbar:${summary.inStock} ausverkauft:${summary.outOfStock} unbekannt:${summary.unknown}, Filter blendet nur ausverkauft aus)`,
       );
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      setStatus(`error: ${message}`);
+      const message = error instanceof Error ? error.message : 'Unbekannter Fehler';
+      setStatus(`Fehler: ${message}`);
       console.error('Availability validation failed', error);
     } finally {
       setInStockSyncButtonState(false);
@@ -768,7 +769,7 @@ inStockOnlyCheckbox.addEventListener('change', async () => {
   setInStockSyncButtonState(false);
   if (allItems.length > 0) {
     const visibleCount = getVisibleItems().length;
-    setStatus(`done: ${visibleCount}/${allItems.length}`);
+    setStatus(`Fertig: ${visibleCount}/${allItems.length}`);
   }
 });
 
@@ -814,7 +815,7 @@ searchInput.addEventListener('input', () => {
   renderCurrentPage();
   if (allItems.length > 0) {
     const visibleCount = getVisibleItems().length;
-    setStatus(`done: ${visibleCount}/${allItems.length}`);
+    setStatus(`Fertig: ${visibleCount}/${allItems.length}`);
   }
 });
 

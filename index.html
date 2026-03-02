@@ -3,31 +3,68 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MB Parts PoC</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <title>MB Teile</title>
   </head>
   <body>
     <main class="app">
       <header class="toolbar">
-        <h1>MB Parts</h1>
+        <h1>MB Teile</h1>
         <div class="toolbar-actions">
-          <input id="search-input" class="search-input" type="search" placeholder="Suche nach Nummer oder Name" />
+          <input
+            id="search-input"
+            class="search-input"
+            type="search"
+            placeholder="Suche nach Nummer oder Name"
+          />
           <label class="filter-toggle" for="in-stock-only">
             <input id="in-stock-only" type="checkbox" />
             <span>Nur Lieferbar</span>
           </label>
           <button id="reload-btn" type="button">Sync</button>
-          <p id="status" class="status">idle</p>
         </div>
       </header>
+
+      <h2 class="section-title">Teilekatalog für A309 und A310</h2>
+      <p id="status" class="status-banner">idle</p>
 
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th><button class="sort-btn" data-sort-key="partNumber" type="button">Artikelnummer</button></th>
+              <th>
+                <button
+                  class="sort-btn"
+                  data-sort-key="partNumber"
+                  type="button"
+                >
+                  Artikelnummer
+                </button>
+              </th>
               <th>Name</th>
-              <th><button class="sort-btn" data-sort-key="price" type="button">Preis</button></th>
-              <th><button class="sort-btn" data-sort-key="availability" type="button">Lieferbarkeit</button></th>
+              <th>
+                <button class="sort-btn" data-sort-key="price" type="button">
+                  Preis
+                </button>
+              </th>
+              <th>
+                <button
+                  class="sort-btn"
+                  data-sort-key="availability"
+                  type="button"
+                >
+                  Lieferbarkeit
+                </button>
+              </th>
               <th>Link</th>
             </tr>
           </thead>
@@ -36,9 +73,9 @@
       </div>
 
       <footer class="pagination">
-        <button id="prev-page-btn" type="button">Prev</button>
-        <p id="page-info" class="page-info">Page 0 / 0</p>
-        <button id="next-page-btn" type="button">Next</button>
+        <button id="prev-page-btn" type="button">Zurück</button>
+        <p id="page-info" class="page-info">Seite 0 / 0</p>
+        <button id="next-page-btn" type="button">Weiter</button>
       </footer>
     </main>
 
