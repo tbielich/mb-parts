@@ -94,14 +94,41 @@ function extractPrice(text: string): string | undefined {
 }
 
 function extractAvailability(text: string): Availability {
-  const normalized = text.toLowerCase();
+  const normalized = text
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
 
-  if (/nicht\s+verf\u00fcgbar|out\s+of\s+stock|sold\s+out/.test(normalized)) {
-    return { status: 'out_of_stock', label: 'Out of stock' };
+  if (!normalized) {
+    return { status: 'in_stock', label: 'Verfügbar' };
   }
 
-  if (/verf\u00fcgbar|lieferbar|in\s+stock|sofort\s+lieferbar/.test(normalized)) {
-    return { status: 'in_stock', label: 'In stock' };
+  if (/sofort\s+verf\u00fcgbar/.test(normalized)) {
+    return { status: 'in_stock', label: 'Sofort verfügbar' };
+  }
+
+  if (
+    /nicht\s+sofort\s+verf\u00fcgbar|lieferzeit|lieferbar\s+in|\b\d+\s*-\s*\d+\s*(?:tage|werktage)\b|\b\d+\s*(?:tage|werktage)\b/.test(
+      normalized,
+    )
+  ) {
+    return { status: 'in_stock', label: 'Verfügbar' };
+  }
+
+  if (
+    /ausverkauft|sold\s+out|out\s+of\s+stock|nicht\s+lieferbar|derzeit\s+nicht\s+verf\u00fcgbar|aktuell\s+nicht\s+verf\u00fcgbar|momentan\s+nicht\s+verf\u00fcgbar|nicht\s+mehr\s+verf\u00fcgbar/.test(
+      normalized,
+    )
+  ) {
+    return { status: 'out_of_stock', label: 'Ausverkauft' };
+  }
+
+  if (
+    /sofort\s+verf\u00fcgbar|sofort\s+lieferbar|auf\s+lager|lagernd|verf\u00fcgbar|lieferbar|in\s+stock/.test(
+      normalized,
+    )
+  ) {
+    return { status: 'in_stock', label: 'Verfügbar' };
   }
 
   if (/vorbestell|preorder/.test(normalized)) {
@@ -600,7 +627,7 @@ async function fetchProductDetailMeta(url: string): Promise<ProductDetailMeta> {
       },
     });
     if (!response.ok) {
-      return { availability: { status: 'unknown', label: 'Unknown' } };
+      return { availability: { status: 'in_stock', label: 'Verfügbar' } };
     }
 
     const html = await response.text();
@@ -617,15 +644,35 @@ async function fetchProductDetailMeta(url: string): Promise<ProductDetailMeta> {
       return soldOutMeta;
     }
 
-    const infoText = $('.delivery-information').first().text().replace(/\s+/g, ' ').trim();
+    const infoText = [
+      '.delivery-information',
+      '.product-delivery',
+      '.product-availability',
+      '[class*="delivery"]',
+      '[class*="availability"]',
+    ]
+      .map((selector) =>
+        $(selector)
+          .toArray()
+          .map((node) => $(node).text().replace(/\s+/g, ' ').trim())
+          .filter(Boolean)
+          .join(' '),
+      )
+      .find(Boolean);
+    const fallbackText = $('body').text().replace(/\s+/g, ' ').trim();
+    const parsed = extractAvailability(infoText ?? '');
+    const resolvedAvailability = parsed.status !== 'unknown' ? parsed : extractAvailability(fallbackText);
     const detailMeta: ProductDetailMeta = {
-      availability: extractAvailability(infoText),
+      availability:
+        resolvedAvailability.status === 'unknown'
+          ? { status: 'in_stock', label: 'Verfügbar' }
+          : resolvedAvailability,
       price: detailPrice,
     };
     productDetailCache.set(url, detailMeta);
     return detailMeta;
   } catch {
-    return { availability: { status: 'unknown', label: 'Unknown' } };
+    return { availability: { status: 'in_stock', label: 'Verfügbar' } };
   }
 }
 

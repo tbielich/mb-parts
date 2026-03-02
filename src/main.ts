@@ -40,6 +40,8 @@ type SyncPricesResponse = {
   ok: boolean;
   updated: number;
   pricedCount?: number;
+  validatedCount?: number;
+  missingCount?: number;
   nextCursor?: number;
   entries?: EnrichVisibleResponse['entries'];
 };
@@ -89,11 +91,11 @@ function getRequiredElement<T extends Element>(selector: string): T {
 const tbody = getRequiredElement<HTMLTableSectionElement>('#parts-tbody');
 const statusLine = getRequiredElement<HTMLParagraphElement>('#status');
 const syncButton = getRequiredElement<HTMLButtonElement>('#reload-btn');
+const inStockOnlyCheckbox = getRequiredElement<HTMLInputElement>('#in-stock-only');
 const prevPageButton = getRequiredElement<HTMLButtonElement>('#prev-page-btn');
 const nextPageButton = getRequiredElement<HTMLButtonElement>('#next-page-btn');
 const pageInfo = getRequiredElement<HTMLParagraphElement>('#page-info');
 const searchInput = getRequiredElement<HTMLInputElement>('#search-input');
-const inStockOnlyCheckbox = getRequiredElement<HTMLInputElement>('#in-stock-only');
 const sortButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.sort-btn'));
 
 let allItems: PartItem[] = [];
@@ -104,6 +106,8 @@ let sortDirection: SortDirection = 'asc';
 let inStockOnly = false;
 let searchQuery = '';
 
+const inStockSyncBatchSize = 100;
+
 const lazyLoadingPartNumbers = new Set<string>();
 const lazyLoadedPartNumbers = new Set<string>();
 const chunkCache = new Map<number, PartItem[]>();
@@ -112,6 +116,37 @@ let chunkMapCache: ChunkMap | null = null;
 
 function setStatus(text: string): void {
   statusLine.textContent = text;
+}
+
+function setInStockSyncButtonState(isLoading: boolean): void {
+  if (isLoading) {
+    inStockOnlyCheckbox.disabled = true;
+    return;
+  }
+
+  inStockOnlyCheckbox.disabled = allItems.length === 0;
+  inStockOnlyCheckbox.checked = inStockOnly;
+}
+
+function getAvailabilitySummary(items: PartItem[]): { inStock: number; outOfStock: number; unknown: number } {
+  let inStock = 0;
+  let outOfStock = 0;
+  let unknown = 0;
+
+  for (const item of items) {
+    const status = getAvailability(item).status;
+    if (status === 'in_stock') {
+      inStock += 1;
+      continue;
+    }
+    if (status === 'out_of_stock') {
+      outOfStock += 1;
+      continue;
+    }
+    unknown += 1;
+  }
+
+  return { inStock, outOfStock, unknown };
 }
 
 function getAvailability(item: PartItem): Availability {
@@ -125,6 +160,13 @@ function getPriceValue(price: string | undefined): number {
   const normalized = price.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.');
   const value = Number.parseFloat(normalized);
   return Number.isFinite(value) ? value : Number.POSITIVE_INFINITY;
+}
+
+function normalizePriceLabel(price: string | undefined): string {
+  if (!price) {
+    return 'N/A';
+  }
+  return price.replaceAll('*', '').trim() || 'N/A';
 }
 
 function getAvailabilityRank(status: AvailabilityStatus): number {
@@ -211,7 +253,7 @@ function matchesSearch(item: PartItem, query: string): boolean {
 
 function getVisibleItems(): PartItem[] {
   return allItems.filter((item) => {
-    if (inStockOnly && getAvailability(item).status !== 'in_stock') {
+    if (inStockOnly && getAvailability(item).status === 'out_of_stock') {
       return false;
     }
     return matchesSearch(item, searchQuery);
@@ -246,7 +288,7 @@ function renderTable(items: PartItem[]): void {
     .map((item) => {
       const availability = getAvailability(item);
       const isLazyLoading = lazyLoadingPartNumbers.has(item.partNumber);
-      const price = item.price?.trim() || 'N/A';
+      const price = normalizePriceLabel(item.price);
       const name = item.name?.trim() || 'N/A';
       const badgeClass = `badge badge-${availability.status}`;
       const priceCell = isLazyLoading
@@ -358,6 +400,7 @@ function clearResultState(): void {
   currentPage = 1;
   lazyLoadingPartNumbers.clear();
   lazyLoadedPartNumbers.clear();
+  setInStockSyncButtonState(false);
   renderCurrentPage({ triggerLazy: false });
 }
 
@@ -368,6 +411,7 @@ function applyResultItems(items: PartItem[]): void {
   applySort(allItems);
   currentPage = 1;
   updateSortButtonLabels();
+  setInStockSyncButtonState(false);
   renderCurrentPage();
 }
 
@@ -422,6 +466,16 @@ function applyEnrichmentEntries(entries: EnrichVisibleResponse['entries'] | unde
     return;
   }
 
+  const mergeAvailability = (current: Availability, incoming?: Availability): Availability => {
+    if (!incoming) {
+      return current;
+    }
+    if (incoming.status === 'unknown' && current.status !== 'unknown') {
+      return current;
+    }
+    return incoming;
+  };
+
   const applyTo = (items: PartItem[]) => {
     for (const item of items) {
       const entry = entries[item.partNumber];
@@ -431,14 +485,54 @@ function applyEnrichmentEntries(entries: EnrichVisibleResponse['entries'] | unde
       if (entry.price) {
         item.price = entry.price;
       }
-      if (entry.availability) {
-        item.availability = entry.availability;
-      }
+      item.availability = mergeAvailability(getAvailability(item), entry.availability);
     }
   };
 
   applyTo(allItems);
   applyTo(initialChunkItems);
+}
+
+async function validateUnknownAvailability(): Promise<number> {
+  const unknownPartNumbers = Array.from(
+    new Set(
+      allItems
+        .filter((item) => getAvailability(item).status === 'unknown')
+        .map((item) => item.partNumber),
+    ),
+  );
+  const total = unknownPartNumbers.length;
+  if (total === 0) {
+    return 0;
+  }
+
+  let processed = 0;
+  let validatedTotal = 0;
+
+  for (let i = 0; i < unknownPartNumbers.length; i += inStockSyncBatchSize) {
+    const batchPartNumbers = unknownPartNumbers.slice(i, i + inStockSyncBatchSize);
+    const response = await fetch(`/api/sync-prices?batch=${batchPartNumbers.length}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ partNumbers: batchPartNumbers }),
+    });
+    if (!response.ok) {
+      throw new Error(`Availability sync failed (${response.status})`);
+    }
+
+    const payload = (await response.json()) as SyncPricesResponse;
+    applyEnrichmentEntries(payload.entries);
+    validatedTotal += payload.validatedCount ?? batchPartNumbers.length;
+    processed += batchPartNumbers.length;
+
+    if (sortKey === 'availability' || sortKey === 'price') {
+      applySort(allItems);
+    }
+    renderCurrentPage({ triggerLazy: false });
+    setStatus(`validating availability... ${processed}/${total}`);
+  }
+
+  return validatedTotal;
 }
 
 async function loadChunkArtifacts(): Promise<{ manifest: ChunkManifest; map: ChunkMap }> {
@@ -550,16 +644,25 @@ async function loadInitialChunk(): Promise<void> {
 }
 
 async function syncAndReload(): Promise<void> {
-  setStatus('syncing base...');
+  setStatus('syncing base (live)...');
   syncButton.disabled = true;
+  setInStockSyncButtonState(true);
 
   try {
     const prefixParam = syncPrefixes.length > 0 ? `prefix=${encodeURIComponent(syncPrefixes.join('|'))}&` : '';
-    const baseResponse = await fetch(`/api/sync?${prefixParam}limit=all`, {
-      method: 'POST',
-    });
+    let baseResponse: Response;
+    try {
+      baseResponse = await fetch(`/api/sync?${prefixParam}limit=all`, {
+        method: 'POST',
+      });
+    } catch {
+      setStatus('live sync unreachable, loading local catalog...');
+      await loadInitialChunk();
+      return;
+    }
     if (baseResponse.status === 404) {
-      setStatus('error: Sync API not available in this deployment (local dev only).');
+      setStatus('live sync unavailable, loading local catalog...');
+      await loadInitialChunk();
       return;
     }
     if (!baseResponse.ok) {
@@ -572,55 +675,101 @@ async function syncAndReload(): Promise<void> {
       .map((item) => normalizePartRecord(item))
       .filter((item): item is PartItem => Boolean(item));
 
-    if (syncItems.length > 0) {
-      initialChunkItems = syncItems;
-      showInitialChunkResults('done');
-    }
-
-    setStatus('syncing prices...');
-    const priceTargets = allItems.slice(0, 200).map((item) => item.partNumber);
-    const priceResponse = await fetch('/api/sync-prices?batch=200', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ partNumbers: priceTargets }),
-    });
-    if (priceResponse.status === 404) {
-      setStatus('error: Sync Prices API not available in this deployment (local dev only).');
-      return;
-    }
-    if (!priceResponse.ok) {
-      throw new Error(`Price sync failed (${priceResponse.status})`);
-    }
-
-    const pricePayload = (await priceResponse.json()) as SyncPricesResponse;
-    applyEnrichmentEntries(pricePayload.entries);
-    if (sortKey === 'price' || sortKey === 'availability') {
-      applySort(allItems);
-    }
-    renderCurrentPage();
-
-    if (syncItems.length > 0) {
-      const visibleCount = getVisibleItems().length;
-      setStatus(`sync done: ${visibleCount}/${allItems.length}`);
-    } else {
+    if (syncItems.length === 0) {
       setStatus('sync done. Re-run chunk:index for fresh search index.');
       chunkCache.clear();
       chunkManifestCache = null;
       chunkMapCache = null;
       initialChunkItems = [];
       await loadInitialChunk();
+      return;
     }
+
+    initialChunkItems = syncItems;
+    applyResultItems(initialChunkItems);
+    setStatus(`syncing details (live)... 0/${allItems.length}`);
+
+    const allPartNumbers = allItems.map((item) => item.partNumber);
+    const total = allPartNumbers.length;
+    let processed = 0;
+    let validatedTotal = 0;
+
+    for (let i = 0; i < allPartNumbers.length; i += inStockSyncBatchSize) {
+      const batchPartNumbers = allPartNumbers.slice(i, i + inStockSyncBatchSize);
+      const response = await fetch(`/api/sync-prices?batch=${batchPartNumbers.length}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ partNumbers: batchPartNumbers }),
+      });
+      if (!response.ok) {
+        throw new Error(`Details sync failed (${response.status})`);
+      }
+
+      const payload = (await response.json()) as SyncPricesResponse;
+      applyEnrichmentEntries(payload.entries);
+      validatedTotal += payload.validatedCount ?? batchPartNumbers.length;
+      processed += batchPartNumbers.length;
+
+      if (sortKey === 'availability' || sortKey === 'price') {
+        applySort(allItems);
+      }
+      renderCurrentPage({ triggerLazy: false });
+      setStatus(`syncing details (live)... ${processed}/${total}`);
+    }
+
+    if (sortKey === 'availability' || sortKey === 'price') {
+      applySort(allItems);
+    }
+    renderCurrentPage({ triggerLazy: false });
+
+    const visibleCount = getVisibleItems().length;
+    const summary = getAvailabilitySummary(allItems);
+    setStatus(
+      `sync done: ${visibleCount}/${allItems.length} (in:${summary.inStock} out:${summary.outOfStock} unknown:${summary.unknown}, validated ${validatedTotal})`,
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     setStatus(`error: ${message}`);
     console.error('Sync failed', error);
   } finally {
     syncButton.disabled = false;
+    setInStockSyncButtonState(false);
   }
 }
 
 syncButton.addEventListener('click', () => {
   void syncAndReload();
+});
+
+inStockOnlyCheckbox.addEventListener('change', async () => {
+  inStockOnly = inStockOnlyCheckbox.checked;
+  currentPage = 1;
+  if (inStockOnly) {
+    setInStockSyncButtonState(true);
+    try {
+      await validateUnknownAvailability();
+      renderCurrentPage();
+      const visibleCount = getVisibleItems().length;
+      const summary = getAvailabilitySummary(allItems);
+      setStatus(
+        `done: ${visibleCount}/${allItems.length} (in:${summary.inStock} out:${summary.outOfStock} unknown:${summary.unknown}, filter hides only out_of_stock)`,
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      setStatus(`error: ${message}`);
+      console.error('Availability validation failed', error);
+    } finally {
+      setInStockSyncButtonState(false);
+    }
+    return;
+  }
+
+  renderCurrentPage();
+  setInStockSyncButtonState(false);
+  if (allItems.length > 0) {
+    const visibleCount = getVisibleItems().length;
+    setStatus(`done: ${visibleCount}/${allItems.length}`);
+  }
 });
 
 prevPageButton.addEventListener('click', () => {
@@ -659,16 +808,6 @@ sortButtons.forEach((button) => {
   });
 });
 
-inStockOnlyCheckbox.addEventListener('change', () => {
-  inStockOnly = inStockOnlyCheckbox.checked;
-  currentPage = 1;
-  renderCurrentPage();
-  const visibleCount = getVisibleItems().length;
-  if (allItems.length > 0) {
-    setStatus(`done: ${visibleCount}/${allItems.length}`);
-  }
-});
-
 searchInput.addEventListener('input', () => {
   searchQuery = searchInput.value;
   currentPage = 1;
@@ -681,4 +820,5 @@ searchInput.addEventListener('input', () => {
 
 updateSortButtonLabels();
 renderCurrentPage({ triggerLazy: false });
-void loadInitialChunk();
+setInStockSyncButtonState(false);
+void syncAndReload();

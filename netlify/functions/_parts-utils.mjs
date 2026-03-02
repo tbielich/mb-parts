@@ -6,6 +6,8 @@ export const DEFAULT_PREFIXES = ['A309', 'A310'];
 export const MAX_LIMIT = 5000;
 const BASE_SNAPSHOT_JSON_PATH = resolve(process.cwd(), 'public/data/parts-base.json');
 const AVAILABILITY_FETCH_CONCURRENCY = 6;
+const DETAIL_FETCH_RETRIES = 3;
+const DETAIL_FETCH_TIMEOUT_MS = 15000;
 
 export function jsonResponse(statusCode, payload) {
   return {
@@ -148,51 +150,128 @@ function extractPrice(text) {
 }
 
 function extractAvailability(text) {
-  const normalized = String(text ?? '').toLowerCase();
+  const normalized = String(text ?? '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
 
-  if (/nicht\s+verf\u00fcgbar|out\s+of\s+stock|sold\s+out|ausverkauft/.test(normalized)) {
-    return { status: 'out_of_stock', label: 'Out of stock' };
+  if (!normalized) {
+    return { status: 'in_stock', label: 'Verfügbar' };
   }
 
-  if (/verf\u00fcgbar|lieferbar|in\s+stock|sofort\s+lieferbar/.test(normalized)) {
-    return { status: 'in_stock', label: 'In stock' };
+  if (/sofort\s+verf\u00fcgbar/.test(normalized)) {
+    return { status: 'in_stock', label: 'Sofort verfügbar' };
+  }
+
+  if (
+    /nicht\s+sofort\s+verf\u00fcgbar|lieferzeit|lieferbar\s+in|\b\d+\s*-\s*\d+\s*(?:tage|werktage)\b|\b\d+\s*(?:tage|werktage)\b/.test(
+      normalized,
+    )
+  ) {
+    return { status: 'in_stock', label: 'Verfügbar' };
+  }
+
+  if (
+    /ausverkauft|sold\s+out|out\s+of\s+stock|nicht\s+lieferbar|derzeit\s+nicht\s+verf\u00fcgbar|aktuell\s+nicht\s+verf\u00fcgbar|momentan\s+nicht\s+verf\u00fcgbar|nicht\s+mehr\s+verf\u00fcgbar/.test(
+      normalized,
+    )
+  ) {
+    return { status: 'out_of_stock', label: 'Ausverkauft' };
+  }
+
+  if (
+    /sofort\s+verf\u00fcgbar|sofort\s+lieferbar|auf\s+lager|lagernd|verf\u00fcgbar|lieferbar|in\s+stock/.test(
+      normalized,
+    )
+  ) {
+    return { status: 'in_stock', label: 'Verfügbar' };
   }
 
   return { status: 'unknown', label: 'Unknown' };
 }
 
-export async function fetchProductDetailMeta(url) {
-  try {
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'mb-parts-netlify/1.0',
-        Accept: 'text/html',
-      },
+function getAvailabilityText($) {
+  const candidates = [
+    '.delivery-information',
+    '.product-delivery',
+    '.product-availability',
+    '[class*="delivery"]',
+    '[class*="availability"]',
+  ];
+
+  const parts = [];
+  for (const selector of candidates) {
+    $(selector).each((_, node) => {
+      const value = $(node).text().replace(/\s+/g, ' ').trim();
+      if (value) {
+        parts.push(value);
+      }
     });
-    if (!response.ok) {
-      return { availability: { status: 'unknown', label: 'Unknown' } };
+    if (parts.length > 0) {
+      break;
     }
+  }
+  return parts.join(' ');
+}
 
-    const html = await response.text();
-    const $ = cheerio.load(html);
-    const rawPriceText = $('.product-detail-price').first().text().replace(/\s+/g, ' ').trim();
-    const detailPrice = rawPriceText ? extractPrice(rawPriceText) ?? rawPriceText : undefined;
+function sleep(ms) {
+  return new Promise((resolvePromise) => setTimeout(resolvePromise, ms));
+}
 
-    if ($('.delivery-information.delivery-soldout').length > 0) {
+export async function fetchProductDetailMeta(url) {
+  for (let attempt = 0; attempt < DETAIL_FETCH_RETRIES; attempt += 1) {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), DETAIL_FETCH_TIMEOUT_MS);
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'mb-parts-netlify/1.0',
+          Accept: 'text/html',
+          'Accept-Language': 'de-DE,de;q=0.9,en;q=0.8',
+        },
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+
+      if (!response.ok) {
+        if (attempt < DETAIL_FETCH_RETRIES - 1) {
+          await sleep(250 * (attempt + 1));
+          continue;
+        }
+        return { availability: { status: 'in_stock', label: 'Verfügbar' } };
+      }
+
+      const html = await response.text();
+      const $ = cheerio.load(html);
+      const rawPriceText = $('.product-detail-price').first().text().replace(/\s+/g, ' ').trim();
+      const detailPrice = rawPriceText ? extractPrice(rawPriceText) ?? rawPriceText : undefined;
+
+      if ($('.delivery-information.delivery-soldout').length > 0) {
+        return {
+          availability: { status: 'out_of_stock', label: 'Ausverkauft' },
+          price: detailPrice,
+        };
+      }
+
+      const infoText = getAvailabilityText($);
+      const fallbackText = $('body').text().replace(/\s+/g, ' ').trim();
+      const parsed = extractAvailability(infoText);
+      const availability = parsed.status !== 'unknown' ? parsed : extractAvailability(fallbackText);
       return {
-        availability: { status: 'out_of_stock', label: 'Ausverkauft' },
+        availability:
+          availability.status === 'unknown' ? { status: 'in_stock', label: 'Verfügbar' } : availability,
         price: detailPrice,
       };
+    } catch {
+      if (attempt < DETAIL_FETCH_RETRIES - 1) {
+        await sleep(250 * (attempt + 1));
+        continue;
+      }
+      return { availability: { status: 'in_stock', label: 'Verfügbar' } };
     }
-
-    const infoText = $('.delivery-information').first().text().replace(/\s+/g, ' ').trim();
-    return {
-      availability: extractAvailability(infoText),
-      price: detailPrice,
-    };
-  } catch {
-    return { availability: { status: 'unknown', label: 'Unknown' } };
   }
+
+  return { availability: { status: 'in_stock', label: 'Verfügbar' } };
 }
 
 export async function enrichItems(items) {

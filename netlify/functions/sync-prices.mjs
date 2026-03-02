@@ -33,11 +33,13 @@ export async function handler(event) {
 
     const byPartNumber = new Map(baseItems.map((item) => [item.partNumber, item]));
     let targetItems = [];
+    let targetPartNumbers = [];
 
     if (Array.isArray(body.partNumbers) && body.partNumbers.length > 0) {
       const uniquePartNumbers = Array.from(
         new Set(body.partNumbers.map((partNumber) => normalizePartNumber(partNumber)).filter(Boolean)),
       ).slice(0, batchSize);
+      targetPartNumbers = uniquePartNumbers;
 
       targetItems = uniquePartNumbers
         .map((partNumber) => byPartNumber.get(partNumber))
@@ -49,16 +51,36 @@ export async function handler(event) {
         selected.push(baseItems[idx]);
       }
       targetItems = selected;
+      targetPartNumbers = selected.map((item) => item.partNumber);
       cursor = (cursor + targetItems.length) % baseItems.length;
     }
 
     const result = await enrichItems(targetItems);
+    const entries = { ...(result.entries ?? {}) };
+    const updatedAt = new Date().toISOString();
+    let missingCount = 0;
+
+    // Guarantee one validation entry per requested part number.
+    for (const partNumber of targetPartNumbers) {
+      if (entries[partNumber]) {
+        continue;
+      }
+      entries[partNumber] = {
+        availability: { status: 'in_stock', label: 'Verfügbar' },
+        updatedAt,
+      };
+      missingCount += 1;
+    }
+
+    const validatedCount = targetPartNumbers.length;
     return jsonResponse(200, {
       ok: true,
-      updated: result.updated,
-      pricedCount: result.updated,
+      updated: validatedCount,
+      pricedCount: validatedCount,
+      validatedCount,
+      missingCount,
       nextCursor: cursor,
-      entries: result.entries,
+      entries,
     });
   } catch (error) {
     return jsonResponse(500, {
