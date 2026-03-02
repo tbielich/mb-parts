@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-02T21:27:27.297Z",
+  "updatedAt": "2026-03-02T21:32:13.408Z",
   "count": 612,
   "prices": {
     "A3092400026": {
@@ -8,7 +8,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Motoraufhg. Im Fahrgestell"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092400076": {
       "price": "34,16 €*",
@@ -16,7 +21,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Motoraufhg. Im Fahrgestell"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092401206": {
       "price": "137,29 €*",
@@ -24,7 +34,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Motoraufhg. Im Fahrgestell"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092401306": {
       "price": "137,29 €*",
@@ -32,7 +47,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Motoraufhg. Im Fahrgestell"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092410162": {
       "price": "21,91 €*",
@@ -40,7 +60,11 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092410413": {
       "price": "56,17 €*",
@@ -48,7 +72,11 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092420035": {
       "price": "18,05 €*",
@@ -56,7 +84,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Motoraufhg. Im Fahrgestell"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092600045": {
       "price": "934,20 €*",
@@ -64,7 +97,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Mechanisches Getriebe"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092600050": {
       "price": "237,24 €*",
@@ -72,7 +110,11 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092600150": {
       "price": "127,21 €*",
@@ -80,7 +122,11 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092600195": {
       "price": "31,88 €*",
@@ -88,7 +134,11 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092601182": {
       "price": "101,91 €*",
@@ -96,7 +146,11 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092605937": {
       "price": "45,86 €*",
@@ -104,7 +158,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Mechanisches Getriebe"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092606037": {
       "price": "25,66 €*",
@@ -112,7 +171,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Mechanisches Getriebe"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092606137": {
       "price": "27,19 €*",
@@ -120,7 +184,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Mechanisches Getriebe"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092610780": {
       "price": "11,85 €*",
@@ -128,7 +197,11 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Produktgruppe",
+        "Allgemein"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092610880": {
       "price": "3,68 €*",
@@ -136,7 +209,12 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Classic",
+        "Ersatzteile",
+        "weitere Teile"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092620026": {
       "price": "54,18 €*",
@@ -144,7 +222,12 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Ersatzteile Old",
+        "Abgasanlage",
+        "Allgemein"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092620093": {
       "price": "2,01 €*",
@@ -152,7 +235,11 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092620151": {
       "price": "14,10 €*",
@@ -160,7 +247,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Mechanisches Getriebe"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092620194": {
       "price": "3,53 €*",
@@ -168,7 +260,11 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092620394": {
       "price": "3,53 €*",
@@ -176,7 +272,11 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092620594": {
       "price": "3,53 €*",
@@ -184,7 +284,11 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092650093": {
       "price": "6,78 €*",
@@ -192,7 +296,11 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092650102": {
       "price": "570,11 €*",
@@ -200,7 +308,12 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Classic",
+        "Ersatzteile",
+        "weitere Teile"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092670025": {
       "price": "14,23 €*",
@@ -208,7 +321,12 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Mechanisches Getriebe"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092670274": {
       "price": "63,88 €*",
@@ -216,7 +334,11 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092670311": {
       "price": "20,05 €*",
@@ -224,7 +346,11 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092670322": {
       "price": "4,47 €*",
@@ -232,7 +358,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Mechanisches Getriebe"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092670341": {
       "price": "204,83 €*",
@@ -240,7 +371,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Mechanisches Getriebe"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092670441": {
       "price": "21,42 €*",
@@ -248,7 +384,11 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092670574": {
       "price": "80,29 €*",
@@ -256,7 +396,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Mechanisches Getriebe"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A309267064702": {
       "price": "6,16 €*",
@@ -264,7 +409,11 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092670774": {
       "price": "10,57 €*",
@@ -272,7 +421,11 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092670859": {
       "price": "70,25 €*",
@@ -280,7 +433,11 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092670917": {
       "price": "9,71 €*",
@@ -288,7 +445,12 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Mechanisches Getriebe"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092670950": {
       "price": "3,84 €*",
@@ -296,7 +458,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Mechanisches Getriebe"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092671050": {
       "price": "3,94 €*",
@@ -304,7 +471,12 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Mechanisches Getriebe"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092671117": {
       "price": "114,66 €*",
@@ -312,7 +484,11 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092671317": {
       "price": "13,09 €*",
@@ -320,7 +496,11 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092671502": {
       "price": "34,94 €*",
@@ -328,7 +508,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Mechanisches Getriebe"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092700320": {
       "price": "1.314,88 €*",
@@ -336,7 +521,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Automat./Hydr. Getriebe"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092900839": {
       "price": "26,50 €*",
@@ -344,7 +534,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Pedalanlage"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092901016": {
       "price": "168,44 €*",
@@ -352,7 +547,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Pedalanlage"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092901333": {
       "price": "354,55 €*",
@@ -360,7 +560,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Pedalanlage"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092901639": {
       "price": "253,78 €*",
@@ -368,7 +573,11 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092903619": {
       "price": "807,89 €*",
@@ -376,7 +585,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Pedalanlage"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092930074": {
       "price": "69,77 €*",
@@ -384,7 +598,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Pedalanlage"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092930111": {
       "price": "195,78 €*",
@@ -392,7 +611,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Pedalanlage"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3092931210": {
       "price": "194,37 €*",
@@ -400,7 +624,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:01:30.943Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Pedalanlage"
+      ],
+      "updatedAt": "2026-03-02T21:31:28.380Z"
     },
     "A3093000132": {
       "price": "72,07 €*",
@@ -408,7 +637,11 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093000304": {
       "price": "119,54 €*",
@@ -416,7 +649,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Regulierung"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093000430": {
       "price": "42,69 €*",
@@ -424,7 +662,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Regulierung"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093001015": {
       "price": "80,04 €*",
@@ -432,7 +675,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Regulierung"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093001304": {
       "price": "20,05 €*",
@@ -440,7 +688,11 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093010022": {
       "price": "3,00 €*",
@@ -448,7 +700,11 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093011315": {
       "price": "30,77 €*",
@@ -456,7 +712,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Regulierung"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093011515": {
       "price": "30,77 €*",
@@ -464,7 +725,11 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093020050": {
       "price": "5,60 €*",
@@ -472,7 +737,11 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093100277": {
       "price": "135,77 €*",
@@ -480,7 +749,11 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093100777": {
       "price": "280,80 €*",
@@ -488,7 +761,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Fahrgestell-/Hilfsrahmen"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093100977": {
       "price": "59,50 €*",
@@ -496,7 +774,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Fahrgestell-/Hilfsrahmen"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093101522": {
       "price": "519,49 €*",
@@ -504,7 +787,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Fahrgestell-/Hilfsrahmen"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093101563": {
       "price": "59,05 €*",
@@ -512,7 +800,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Fahrgestell-/Hilfsrahmen"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093110184": {
       "price": "10,19 €*",
@@ -520,7 +813,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Fahrgestell-/Hilfsrahmen"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093110663": {
       "price": "52,68 €*",
@@ -528,7 +826,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Fahrgestell-/Hilfsrahmen"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093110684": {
       "price": "6,37 €*",
@@ -536,7 +839,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Fahrgestell-/Hilfsrahmen"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093111863": {
       "price": "15,27 €*",
@@ -544,7 +852,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Fahrgestell-/Hilfsrahmen"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093150031": {
       "price": "2,43 €*",
@@ -552,7 +865,11 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093150037": {
       "price": "134,29 €*",
@@ -560,7 +877,11 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093150040": {
       "price": "56,39 €*",
@@ -568,7 +889,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Fahrgestell-/Hilfsrahmen"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093150306": {
       "price": "36,77 €*",
@@ -576,7 +902,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Fahrgestell-/Hilfsrahmen"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093200047": {
       "price": "155,58 €*",
@@ -584,7 +915,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Federn und Federaufhängung"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093200073": {
       "price": "12,17 €*",
@@ -592,7 +928,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Federn und Federaufhängung"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A309320007302": {
       "price": "12,17 €*",
@@ -600,7 +941,12 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Federn und Federaufhängung"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A309320007364": {
       "price": "12,17 €*",
@@ -608,7 +954,12 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Federn und Federaufhängung"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093200093": {
       "price": "519,29 €*",
@@ -616,7 +967,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Federn und Federaufhängung"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093200177": {
       "price": "40,58 €*",
@@ -624,7 +980,12 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Federn und Federaufhängung"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093200228": {
       "price": "160,03 €*",
@@ -632,7 +993,11 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093200270": {
       "price": "119,82 €*",
@@ -640,7 +1005,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Federn und Federaufhängung"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093200356": {
       "price": "192,77 €*",
@@ -648,7 +1018,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Federn und Federaufhängung"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093200428": {
       "price": "206,95 €*",
@@ -656,7 +1031,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Federn und Federaufhängung"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093200570": {
       "price": "179,74 €*",
@@ -664,7 +1044,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Federn und Federaufhängung"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093200675": {
       "price": "89,76 €*",
@@ -672,7 +1057,7 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:08:05.779Z"
+      "updatedAt": "2026-03-02T21:31:09.233Z"
     },
     "A3093201102": {
       "price": "548,22 €*",
@@ -680,7 +1065,7 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:08:05.779Z"
+      "updatedAt": "2026-03-02T21:31:09.233Z"
     },
     "A3093201202": {
       "price": "593,88 €*",
@@ -688,7 +1073,7 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:08:05.779Z"
+      "updatedAt": "2026-03-02T21:31:09.233Z"
     },
     "A3093203406": {
       "price": "1.142,16 €*",
@@ -696,7 +1081,7 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:08:05.779Z"
+      "updatedAt": "2026-03-02T21:31:09.233Z"
     },
     "A3093206506": {
       "price": "896,20 €*",
@@ -704,7 +1089,7 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:08:05.779Z"
+      "updatedAt": "2026-03-02T21:31:09.233Z"
     },
     "A3093220050": {
       "price": "33,43 €*",
@@ -712,7 +1097,7 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:08:05.779Z"
+      "updatedAt": "2026-03-02T21:31:09.233Z"
     },
     "A3093230285": {
       "price": "26,49 €*",
@@ -720,7 +1105,7 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:08:05.779Z"
+      "updatedAt": "2026-03-02T21:31:09.233Z"
     },
     "A3093230385": {
       "price": "13,32 €*",
@@ -728,7 +1113,7 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:08:05.779Z"
+      "updatedAt": "2026-03-02T21:31:09.233Z"
     },
     "A3093230440": {
       "price": "10,08 €*",
@@ -736,7 +1121,7 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:08:05.779Z"
+      "updatedAt": "2026-03-02T21:31:09.233Z"
     },
     "A3093250040": {
       "price": "2,38 €*",
@@ -744,7 +1129,7 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:08:05.779Z"
+      "updatedAt": "2026-03-02T21:31:09.233Z"
     },
     "A3093250042": {
       "price": "3,02 €*",
@@ -752,7 +1137,7 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:08:05.779Z"
+      "updatedAt": "2026-03-02T21:31:09.233Z"
     },
     "A3093250162": {
       "price": "15,16 €*",
@@ -760,7 +1145,7 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:08:05.779Z"
+      "updatedAt": "2026-03-02T21:31:09.233Z"
     },
     "A3093250331": {
       "price": "32,87 €*",
@@ -1096,7 +1481,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Pedalanlage"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A309295003564": {
       "price": "49,78 €*",
@@ -1104,7 +1494,11 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3092950036": {
       "price": "4,15 €*",
@@ -1112,7 +1506,11 @@
         "status": "in_stock",
         "label": "Sofort verfügbar"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Original-Teile - Klassen",
+        "new"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3092950087": {
       "price": "120,27 €*",
@@ -1120,7 +1518,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Pedalanlage"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3092950331": {
       "price": "71,61 €*",
@@ -1128,7 +1531,12 @@
         "status": "out_of_stock",
         "label": "Ausverkauft"
       },
-      "updatedAt": "2026-03-02T21:07:59.097Z"
+      "hierarchyGroups": [
+        "Originalteile",
+        "Fahrgestell",
+        "Pedalanlage"
+      ],
+      "updatedAt": "2026-03-02T21:32:13.408Z"
     },
     "A3093260547": {
       "price": "10,02 €*",

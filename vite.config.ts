@@ -15,6 +15,7 @@ type PartItem = {
   price?: string;
   url: string;
   availability: Availability;
+  hierarchyGroups?: string[];
 };
 
 const MB_SEARCH_BASE = 'https://originalteile.mercedes-benz.de/search';
@@ -30,6 +31,7 @@ const PRICE_SNAPSHOT_STATE_JSON_PATH = resolve(process.cwd(), 'public/data/parts
 type ProductDetailMeta = {
   availability: Availability;
   price?: string;
+  hierarchyGroups?: string[];
 };
 
 type PartsSnapshot = {
@@ -43,6 +45,7 @@ type PartsSnapshot = {
 type PriceEntry = {
   price?: string;
   availability?: Availability;
+  hierarchyGroups?: string[];
   updatedAt: string;
 };
 
@@ -188,6 +191,59 @@ function toStringIfDefined(value: unknown): string | undefined {
     return String(value);
   }
   return undefined;
+}
+
+function normalizeHierarchyGroups(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const entry of value) {
+    const normalized = String(entry ?? '').replace(/\s+/g, ' ').trim();
+    if (!normalized) {
+      continue;
+    }
+    const key = normalized.toLowerCase();
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    result.push(normalized);
+  }
+  return result;
+}
+
+function extractBreadcrumbGroups($: cheerio.CheerioAPI): string[] {
+  const selectors = [
+    '.breadcrumb li',
+    '.breadcrumb a',
+    '[class*="breadcrumb"] li',
+    '[class*="breadcrumb"] a',
+    'nav[aria-label*="breadcrumb" i] li',
+    'nav[aria-label*="breadcrumb" i] a',
+  ];
+  const ignored = new Set(['home', 'startseite', 'home page']);
+  const seen = new Set<string>();
+  const groups: string[] = [];
+
+  for (const selector of selectors) {
+    $(selector).each((_, node) => {
+      const value = $(node).text().replace(/\s+/g, ' ').trim();
+      const key = value.toLowerCase();
+      if (!value || ignored.has(key) || seen.has(key)) {
+        return;
+      }
+      seen.add(key);
+      groups.push(value);
+    });
+    if (groups.length > 0) {
+      break;
+    }
+  }
+
+  return groups;
 }
 
 function extractItemsFromStructuredScripts(html: string, baseUrl: string, prefixes: string[]): PartItem[] {
@@ -634,11 +690,13 @@ async function fetchProductDetailMeta(url: string): Promise<ProductDetailMeta> {
     const $ = cheerio.load(html);
     const rawPriceText = $('.product-detail-price').first().text().replace(/\s+/g, ' ').trim();
     const detailPrice = rawPriceText ? extractPrice(rawPriceText) ?? rawPriceText : undefined;
+    const hierarchyGroups = extractBreadcrumbGroups($);
 
     if ($('.delivery-information.delivery-soldout').length > 0) {
       const soldOutMeta: ProductDetailMeta = {
         availability: { status: 'out_of_stock', label: 'Ausverkauft' },
         price: detailPrice,
+        hierarchyGroups,
       };
       productDetailCache.set(url, soldOutMeta);
       return soldOutMeta;
@@ -668,6 +726,7 @@ async function fetchProductDetailMeta(url: string): Promise<ProductDetailMeta> {
           ? { status: 'in_stock', label: 'Verfügbar' }
           : resolvedAvailability,
       price: detailPrice,
+      hierarchyGroups,
     };
     productDetailCache.set(url, detailMeta);
     return detailMeta;
@@ -686,6 +745,7 @@ async function enrichItemsFromProductPage(items: PartItem[]): Promise<void> {
       if (results[j].price) {
         chunk[j].price = results[j].price;
       }
+      chunk[j].hierarchyGroups = normalizeHierarchyGroups(results[j].hierarchyGroups);
     }
   }
 }
@@ -949,6 +1009,7 @@ async function enrichVisiblePartNumbers(
       const value: PriceEntry = {
         price: detail.price,
         availability: detail.availability,
+        hierarchyGroups: detail.hierarchyGroups,
         updatedAt,
       };
       priceSnapshot.prices[partNumber] = value;
@@ -1008,7 +1069,8 @@ async function syncPriceBatch(batchSize: number): Promise<{ updated: number; pri
     for (let j = 0; j < chunk.length; j += 1) {
       const price = meta[j].price;
       const availability = meta[j].availability;
-      priceSnapshot.prices[chunk[j].partNumber] = { price, availability, updatedAt };
+      const hierarchyGroups = meta[j].hierarchyGroups;
+      priceSnapshot.prices[chunk[j].partNumber] = { price, availability, hierarchyGroups, updatedAt };
     }
   }
 

@@ -13,6 +13,7 @@ type PartItem = {
   price?: string;
   url: string;
   availability?: Availability;
+  hierarchyGroups?: string[];
 };
 
 type EnrichVisibleResponse = {
@@ -23,6 +24,7 @@ type EnrichVisibleResponse = {
     {
       price?: string;
       availability?: Availability;
+      hierarchyGroups?: string[];
       updatedAt: string;
     }
   >;
@@ -169,6 +171,28 @@ function normalizePriceLabel(price: string | undefined): string {
   return price.replaceAll('*', '').trim() || 'N/A';
 }
 
+function normalizeHierarchyGroups(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const entry of value) {
+    const normalized = String(entry ?? '').replace(/\s+/g, ' ').trim();
+    if (!normalized) {
+      continue;
+    }
+    const key = normalized.toLowerCase();
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    result.push(normalized);
+  }
+  return result;
+}
+
 function getAvailabilityRank(status: AvailabilityStatus): number {
   if (status === 'in_stock') {
     return 0;
@@ -290,6 +314,13 @@ function renderTable(items: PartItem[]): void {
       const isLazyLoading = lazyLoadingPartNumbers.has(item.partNumber);
       const price = normalizePriceLabel(item.price);
       const name = item.name?.trim() || 'N/A';
+      const hierarchyGroups = normalizeHierarchyGroups(item.hierarchyGroups);
+      const hierarchyTags =
+        hierarchyGroups.length > 0
+          ? `<div class="hierarchy-tags">${hierarchyGroups
+              .map((group) => `<span class="hierarchy-tag">${escapeHtml(group)}</span>`)
+              .join('')}</div>`
+          : '';
       const badgeClass = `badge badge-${availability.status}`;
       const priceCell = isLazyLoading
         ? '<span class="skeleton skeleton-text" aria-label="Loading price"></span>'
@@ -302,7 +333,7 @@ function renderTable(items: PartItem[]): void {
       return `
         <tr>
           <td data-label="Artikelnummer">${escapeHtml(item.partNumber)}</td>
-          <td data-label="Name">${escapeHtml(name)}</td>
+          <td data-label="Name">${escapeHtml(name)}${hierarchyTags}</td>
           <td data-label="Preis">${priceCell}</td>
           <td data-label="Verfügbarkeit">${availabilityCell}</td>
           <td data-label="Link"><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener" aria-label="${escapeHtml(linkLabel)}" title="${escapeHtml(linkLabel)}">Prüfen</a></td>
@@ -314,7 +345,7 @@ function renderTable(items: PartItem[]): void {
 
 function shouldLazyEnrich(item: PartItem): boolean {
   const availability = getAvailability(item);
-  return !item.price || availability.status === 'unknown';
+  return !item.price || availability.status === 'unknown' || normalizeHierarchyGroups(item.hierarchyGroups).length === 0;
 }
 
 async function lazyEnrichVisibleItems(items: PartItem[]): Promise<void> {
@@ -354,6 +385,9 @@ async function lazyEnrichVisibleItems(items: PartItem[]): Promise<void> {
       }
       if (entry.availability) {
         item.availability = entry.availability;
+      }
+      if (entry.hierarchyGroups) {
+        item.hierarchyGroups = normalizeHierarchyGroups(entry.hierarchyGroups);
       }
     }
 
@@ -452,6 +486,10 @@ function normalizePartRecord(parsed: Record<string, unknown>): PartItem | null {
   const availability = availabilityFromRoot ?? availabilityFromEnrichment ?? { status: 'unknown', label: 'Unknown' };
   const enrichmentPrice = enrichment?.price;
   const normalizedEnrichmentPrice = typeof enrichmentPrice === 'string' ? enrichmentPrice : undefined;
+  const rootHierarchy = parsed.hierarchy as Record<string, unknown> | undefined;
+  const hierarchyGroups = normalizeHierarchyGroups(
+    parsed.hierarchyGroups ?? rootHierarchy?.groups ?? enrichment?.hierarchyGroups,
+  );
 
   return {
     partNumber,
@@ -459,6 +497,7 @@ function normalizePartRecord(parsed: Record<string, unknown>): PartItem | null {
     price: typeof parsed.price === 'string' ? parsed.price : normalizedEnrichmentPrice,
     url: String(parsed.url ?? ''),
     availability,
+    hierarchyGroups,
   };
 }
 
@@ -487,6 +526,9 @@ function applyEnrichmentEntries(entries: EnrichVisibleResponse['entries'] | unde
         item.price = entry.price;
       }
       item.availability = mergeAvailability(getAvailability(item), entry.availability);
+      if (entry.hierarchyGroups) {
+        item.hierarchyGroups = normalizeHierarchyGroups(entry.hierarchyGroups);
+      }
     }
   };
 

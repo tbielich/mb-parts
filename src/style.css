@@ -209,6 +209,25 @@ a:hover {
   color: var(--unknown-text);
 }
 
+.hierarchy-tags {
+  margin-top: 0.35rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.hierarchy-tag {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.1rem 0.45rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  color: var(--muted);
+  background: #fff;
+}
+
 .skeleton {
   display: inline-block;
   border-radius: 0.35rem;

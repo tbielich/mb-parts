@@ -50,6 +50,23 @@ export function normalizePartNumber(value) {
   return String(value ?? '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 }
 
+function normalizeHierarchyGroups(value) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  const seen = new Set();
+  const result = [];
+  for (const entry of value) {
+    const normalized = String(entry ?? '').replace(/\s+/g, ' ').trim();
+    if (!normalized || seen.has(normalized.toLowerCase())) {
+      continue;
+    }
+    seen.add(normalized.toLowerCase());
+    result.push(normalized);
+  }
+  return result;
+}
+
 function isAllowedPartNumber(partNumber, prefixes) {
   return prefixes.some((prefix) => partNumber.startsWith(prefix));
 }
@@ -127,6 +144,7 @@ export function filterSnapshotItems(items, prefixes, limit) {
       name: String(item.name ?? ''),
       price: typeof item.price === 'string' ? item.price : undefined,
       url: String(item.url ?? ''),
+      hierarchyGroups: normalizeHierarchyGroups(item?.hierarchyGroups ?? item?.hierarchy?.groups),
       availability:
         item.availability && typeof item.availability === 'object'
           ? {
@@ -214,6 +232,38 @@ function getAvailabilityText($) {
   return parts.join(' ');
 }
 
+function extractBreadcrumbGroups($) {
+  const selectors = [
+    '.breadcrumb li',
+    '.breadcrumb a',
+    '[class*="breadcrumb"] li',
+    '[class*="breadcrumb"] a',
+    'nav[aria-label*="breadcrumb" i] li',
+    'nav[aria-label*="breadcrumb" i] a',
+  ];
+
+  const ignored = new Set(['home', 'startseite', 'home page']);
+  const seen = new Set();
+  const groups = [];
+
+  for (const selector of selectors) {
+    $(selector).each((_, node) => {
+      const value = $(node).text().replace(/\s+/g, ' ').trim();
+      const key = value.toLowerCase();
+      if (!value || ignored.has(key) || seen.has(key)) {
+        return;
+      }
+      seen.add(key);
+      groups.push(value);
+    });
+    if (groups.length > 0) {
+      break;
+    }
+  }
+
+  return groups;
+}
+
 function sleep(ms) {
   return new Promise((resolvePromise) => setTimeout(resolvePromise, ms));
 }
@@ -245,11 +295,13 @@ export async function fetchProductDetailMeta(url) {
       const $ = cheerio.load(html);
       const rawPriceText = $('.product-detail-price').first().text().replace(/\s+/g, ' ').trim();
       const detailPrice = rawPriceText ? extractPrice(rawPriceText) ?? rawPriceText : undefined;
+      const hierarchyGroups = extractBreadcrumbGroups($);
 
       if ($('.delivery-information.delivery-soldout').length > 0) {
         return {
           availability: { status: 'out_of_stock', label: 'Ausverkauft' },
           price: detailPrice,
+          hierarchyGroups,
         };
       }
 
@@ -261,6 +313,7 @@ export async function fetchProductDetailMeta(url) {
         availability:
           availability.status === 'unknown' ? { status: 'in_stock', label: 'Verfügbar' } : availability,
         price: detailPrice,
+        hierarchyGroups,
       };
     } catch {
       if (attempt < DETAIL_FETCH_RETRIES - 1) {
@@ -286,6 +339,7 @@ export async function enrichItems(items) {
       entries[chunk[j].partNumber] = {
         price: results[j].price,
         availability: results[j].availability,
+        hierarchyGroups: results[j].hierarchyGroups,
         updatedAt,
       };
     }

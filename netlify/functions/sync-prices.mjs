@@ -67,6 +67,7 @@ export async function handler(event) {
       }
       entries[partNumber] = {
         availability: { status: 'in_stock', label: 'Verfügbar' },
+        hierarchyGroups: [],
         updatedAt,
       };
       missingCount += 1;
