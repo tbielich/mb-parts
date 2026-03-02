@@ -5,7 +5,7 @@
   --bg: #f7f8fb;
   --card: #ffffff;
   --text: #14171f;
-  --muted: #667085;
+  --muted: #475467;
   --border: #e5e7eb;
   --accent: #1f3a8a;
   --in-stock-bg: #dcfce7;
@@ -51,6 +51,18 @@ body {
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .search-input {
@@ -99,11 +111,16 @@ button:disabled {
   cursor: not-allowed;
 }
 
-.status {
+.status,
+.status-banner {
   font-family: var(--ui-font);
   margin: 0;
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+.status-banner {
+  margin-bottom: 0.75rem;
 }
 
 .table-wrap {
@@ -186,6 +203,13 @@ a:hover {
   text-decoration: underline;
 }
 
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 3px solid #0b5fff;
+  outline-offset: 2px;
+}
+
 .badge {
   display: inline-block;
   padding: 0.2rem 0.55rem;
@@ -253,6 +277,13 @@ a:hover {
   }
   100% {
     background-position: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+    background: #e5e7eb;
   }
 }
 

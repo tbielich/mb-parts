@@ -138,7 +138,7 @@ function extractAvailability(text: string): Availability {
     return { status: 'unknown', label: 'Preorder' };
   }
 
-  return { status: 'unknown', label: 'Unknown' };
+  return { status: 'unknown', label: 'Unbekannt' };
 }
 
 function findPartNumber(text: string, prefixes: string[]): string | null {
@@ -807,7 +807,7 @@ async function collectPartsFromSitemap(prefixes: string[], limit: number): Promi
         partNumber,
         name: guessNameFromUrl(loc),
         url: loc,
-        availability: { status: 'unknown', label: 'Unknown' },
+        availability: { status: 'unknown', label: 'Unbekannt' },
       });
 
       if (foundItems.length >= limit) {

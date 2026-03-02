@@ -99,6 +99,7 @@ const nextPageButton = getRequiredElement<HTMLButtonElement>('#next-page-btn');
 const pageInfo = getRequiredElement<HTMLParagraphElement>('#page-info');
 const searchInput = getRequiredElement<HTMLInputElement>('#search-input');
 const sortButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.sort-btn'));
+const sortHeaderCells = Array.from(document.querySelectorAll<HTMLTableCellElement>('th[data-sort-col]'));
 
 let allItems: PartItem[] = [];
 let initialChunkItems: PartItem[] = [];
@@ -152,7 +153,7 @@ function getAvailabilitySummary(items: PartItem[]): { inStock: number; outOfStoc
 }
 
 function getAvailability(item: PartItem): Availability {
-  return item.availability ?? { status: 'unknown', label: 'Unknown' };
+  return item.availability ?? { status: 'unknown', label: 'Unbekannt' };
 }
 
 function getPriceValue(price: string | undefined): number {
@@ -229,6 +230,10 @@ function applySort(items: PartItem[]): void {
 }
 
 function updateSortButtonLabels(): void {
+  sortHeaderCells.forEach((headerCell) => {
+    headerCell.setAttribute('aria-sort', 'none');
+  });
+
   sortButtons.forEach((button) => {
     const buttonKey = button.dataset.sortKey as SortKey | undefined;
     if (!buttonKey) {
@@ -236,9 +241,19 @@ function updateSortButtonLabels(): void {
     }
     const baseLabel = button.textContent?.replace(/\s+[↑↓]$/, '') ?? '';
     if (buttonKey === sortKey) {
+      const ariaSort = sortDirection === 'asc' ? 'ascending' : 'descending';
+      const headerCell = document.querySelector<HTMLTableCellElement>(`th[data-sort-col="${buttonKey}"]`);
+      if (headerCell) {
+        headerCell.setAttribute('aria-sort', ariaSort);
+      }
+      button.setAttribute(
+        'aria-label',
+        `${baseLabel}, sortiert ${sortDirection === 'asc' ? 'aufsteigend' : 'absteigend'}. Aktivieren zum Umschalten.`,
+      );
       button.textContent = `${baseLabel} ${sortDirection === 'asc' ? '↑' : '↓'}`;
       return;
     }
+    button.setAttribute('aria-label', `${baseLabel} sortieren`);
     button.textContent = baseLabel;
   });
 }
@@ -323,10 +338,10 @@ function renderTable(items: PartItem[]): void {
           : '';
       const badgeClass = `badge badge-${availability.status}`;
       const priceCell = isLazyLoading
-        ? '<span class="skeleton skeleton-text" aria-label="Loading price"></span>'
+        ? '<span class="skeleton skeleton-text" aria-label="Preis wird geladen"></span>'
         : escapeHtml(price);
       const availabilityCell = isLazyLoading
-        ? '<span class="skeleton skeleton-pill" aria-label="Loading availability"></span>'
+        ? '<span class="skeleton skeleton-pill" aria-label="Verfügbarkeit wird geladen"></span>'
         : `<span class="${badgeClass}">${escapeHtml(availability.label)}</span>`;
       const linkLabel = `${item.partNumber} in neuem Tab öffnen`;
 
@@ -483,7 +498,8 @@ function normalizePartRecord(parsed: Record<string, unknown>): PartItem | null {
   const availabilityFromRoot = parsed.availability as Availability | undefined;
   const enrichment = parsed.enrichment as Record<string, unknown> | undefined;
   const availabilityFromEnrichment = enrichment?.availability as Availability | undefined;
-  const availability = availabilityFromRoot ?? availabilityFromEnrichment ?? { status: 'unknown', label: 'Unknown' };
+  const availability =
+    availabilityFromRoot ?? availabilityFromEnrichment ?? { status: 'unknown', label: 'Unbekannt' };
   const enrichmentPrice = enrichment?.price;
   const normalizedEnrichmentPrice = typeof enrichmentPrice === 'string' ? enrichmentPrice : undefined;
   const rootHierarchy = parsed.hierarchy as Record<string, unknown> | undefined;

@@ -149,9 +149,9 @@ export function filterSnapshotItems(items, prefixes, limit) {
         item.availability && typeof item.availability === 'object'
           ? {
               status: item.availability.status ?? 'unknown',
-              label: item.availability.label ?? 'Unknown',
+              label: item.availability.label ?? 'Unbekannt',
             }
-          : { status: 'unknown', label: 'Unknown' },
+          : { status: 'unknown', label: 'Unbekannt' },
     });
 
     if (dedup.size >= limit) {
@@ -205,7 +205,7 @@ function extractAvailability(text) {
     return { status: 'in_stock', label: 'Verfügbar' };
   }
 
-  return { status: 'unknown', label: 'Unknown' };
+  return { status: 'unknown', label: 'Unbekannt' };
 }
 
 function getAvailabilityText($) {

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="de">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -20,6 +20,7 @@
       <header class="toolbar">
         <h1>MB Teile</h1>
         <div class="toolbar-actions">
+          <label class="sr-only" for="search-input">Suche nach Nummer oder Name</label>
           <input
             id="search-input"
             class="search-input"
@@ -35,13 +36,14 @@
       </header>
 
       <h2 class="section-title">Teilekatalog für A309 und A310</h2>
-      <p id="status" class="status-banner">idle</p>
+      <p id="status" class="status-banner" role="status" aria-live="polite" aria-atomic="true">Bereit</p>
 
       <div class="table-wrap">
-        <table>
+        <table aria-describedby="status">
+          <caption class="sr-only">Teileliste mit Artikelnummer, Name, Preis, Lieferbarkeit und Link</caption>
           <thead>
             <tr>
-              <th>
+              <th scope="col" data-sort-col="partNumber" aria-sort="ascending">
                 <button
                   class="sort-btn"
                   data-sort-key="partNumber"
@@ -50,13 +52,13 @@
                   Artikelnummer
                 </button>
               </th>
-              <th>Name</th>
-              <th>
+              <th scope="col">Name</th>
+              <th scope="col" data-sort-col="price" aria-sort="none">
                 <button class="sort-btn" data-sort-key="price" type="button">
                   Preis
                 </button>
               </th>
-              <th>
+              <th scope="col" data-sort-col="availability" aria-sort="none">
                 <button
                   class="sort-btn"
                   data-sort-key="availability"
@@ -65,7 +67,7 @@
                   Lieferbarkeit
                 </button>
               </th>
-              <th>Link</th>
+              <th scope="col">Link</th>
             </tr>
           </thead>
           <tbody id="parts-tbody"></tbody>
