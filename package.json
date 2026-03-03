@@ -11,7 +11,11 @@
     "chunk:index": "tsc --target ES2022 --module NodeNext --moduleResolution NodeNext --outDir .tmp/migrate scripts/chunk-ndjson.ts && node .tmp/migrate/chunk-ndjson.js --vehicleKey default",
     "build": "npm run build:data && tsc && vite build",
     "preview": "vite preview",
-    "generate:ikea-svg": "node scripts/generate-ikea-svg.mjs"
+    "generate:ikea-svg": "node scripts/generate-ikea-svg.mjs",
+    "netlify:link": "npx -y netlify link",
+    "netlify:build": "npx -y netlify build",
+    "release:preview": "npx -y netlify deploy --build --json",
+    "release:prod": "npx -y netlify deploy --prod --build --json"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",

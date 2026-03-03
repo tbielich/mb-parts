@@ -2,6 +2,9 @@ node_modules/
 dist/
 .DS_Store
 .tmp/
+.netlify/
+.env
+.env.local
 /data/
 public/data/vehicles/
 public/data/parts-base.json

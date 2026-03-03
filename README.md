@@ -76,3 +76,58 @@ npm run build
 Hinweis: Die Functions nutzen `public/data/parts-base.json` als Basis.  
 Fehlt die Datei, schlägt Sync fehl.
 
+## Netlify MCP + Release Flow
+
+Für mehr Kontrolle über Build- und Deploy-Ausgaben ist der Netlify MCP Server im Repo vorbereitet:
+
+- MCP Config: `mcp.json`
+- Server: `@netlify/mcp`
+
+### 1) Auth + Site verknüpfen
+
+```bash
+npx -y netlify login
+npm run netlify:link
+```
+
+Optional für CI/automatisierte Nutzung:
+
+- `NETLIFY_AUTH_TOKEN`
+- `NETLIFY_SITE_ID`
+
+### 2) Release-Kommandos
+
+- `npm run netlify:build` – führt den Netlify Build lokal aus (nahe an Netlify, aber nicht 1:1 Remote-Infrastruktur)
+- `npm run release:preview` – erstellt ein Preview Deploy mit JSON-Output
+- `npm run release:prod` – erstellt ein Production Deploy mit JSON-Output
+
+Die `release:*` Skripte nutzen `--json`, damit Build-/Deploy-Ergebnisse im Release-Flow maschinenlesbar und eindeutig auswertbar sind.
+
+### 3) Empfohlener Release-Ablauf
+
+```bash
+npm run netlify:build
+npm run release:preview
+# Preview testen
+npm run release:prod
+```
+
+### Troubleshooting
+
+Fehler:
+
+`Error: Could not find the project ID ... please run netlify link`
+
+Lösung:
+
+```bash
+npm run netlify:link
+```
+
+Falls nötig direkt mit Site-ID:
+
+```bash
+npx -y netlify link --id <NETLIFY_SITE_ID>
+```
+
+Hinweis: `netlify:build` validiert den Build lokal mit Netlify-Logik. Das tatsächliche Remote-Verhalten prüfst du über `release:preview` im echten Netlify Deploy.
