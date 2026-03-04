@@ -1,5 +1,7 @@
 # mb-parts-poc
 
+Ein produktionsnahes Parts-Portal für Mercedes-Teile mit strukturierter Datenpipeline, performanter UI und integriertem Netlify Release-Workflow.
+
 Vite + TypeScript PoC für Mercedes-Teile (`A309`/`A310`) mit:
 
 - tabellarischer UI (Suche, Sortierung, Pagination)
@@ -60,12 +62,67 @@ npm run build
 - `POST /api/sync`
 - `POST /api/sync-prices`
 - `POST /api/enrich-visible`
+- `POST /api/chat`
 
 ### Netlify (Functions + Redirects in `netlify.toml`)
 
 - `POST /api/sync` -> `netlify/functions/sync.mjs`
 - `POST /api/sync-prices` -> `netlify/functions/sync-prices.mjs`
 - `POST /api/enrich-visible` -> `netlify/functions/enrich-visible.mjs`
+- `POST /api/chat` -> `netlify/functions/chat.mjs`
+
+## Teile-Berater Chatbot (Startpunkt)
+
+Der PoC enthält ein minimales Beratungs-Widget auf der Startseite:
+
+- Frontend: `src/chatbot.ts` (floating Chat-Widget, API-Call, Ergebnis-Karten)
+- Styling: `src/style.css` (`.parts-chat*`)
+- Backend: `POST /api/chat` (regelbasierte Katalog-Suche)
+
+### Request/Response
+
+Request:
+
+```json
+{ "message": "Suche Bremsbeläge vorne für W204, möglichst günstig" }
+```
+
+Response (gekürzt):
+
+```json
+{
+  "ok": true,
+  "answer": "Ich habe passende Teile aus dem Katalog priorisiert...",
+  "followUpQuestions": ["..."],
+  "recommendations": [
+    {
+      "partNumber": "A309...",
+      "name": "....",
+      "price": "129,00 €",
+      "url": "...",
+      "availability": { "status": "in_stock", "label": "Verfügbar" },
+      "reason": "Name passt zu \"brems...\""
+    }
+  ]
+}
+```
+
+### Aktuelle Matching-Logik
+
+- Exakte Teilenummern werden stark priorisiert.
+- Danach Name/Gruppe-Token-Matching auf Basis des Katalog-Snapshots.
+- Optionaler Bias für Lieferbarkeit (`lieferbar`, `sofort`) oder Preis (`günstig`, `preiswert`).
+- Bei Unsicherheit fragt der Bot nach Modell/Baujahr/VIN.
+
+### Tracking + Warenkorb-Übergabe
+
+- Triggered Events: `chat_open`, `chat_submit`, `chat_reco_click`
+- Tracking-Ausgabe:
+  - Push auf `window.dataLayer` (wenn vorhanden)
+  - Browser-Event `mb_parts_chat_event` (für eigene Listener)
+- Trefferkarten enthalten:
+  - `Teil ansehen`
+  - `In den Warenkorb` (Produkt-URL mit `?ref=mb-parts-chatbot&intent=cart`)
 
 ## Deployment (Netlify)
 

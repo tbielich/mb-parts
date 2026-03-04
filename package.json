@@ -1,5 +1,6 @@
 {
   "name": "mb-parts-poc",
+  "description": "Vite + TypeScript app for Mercedes parts lookup, enrichment, and Netlify-based release automation.",
   "private": true,
   "version": "1.0.0",
   "type": "module",

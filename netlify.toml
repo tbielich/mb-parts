@@ -19,3 +19,8 @@
   from = "/api/enrich-visible"
   to = "/.netlify/functions/enrich-visible"
   status = 200
+
+[[redirects]]
+  from = "/api/chat"
+  to = "/.netlify/functions/chat"
+  status = 200

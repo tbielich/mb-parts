@@ -1,4 +1,5 @@
 import './style.css';
+import { initPartsAdvisorChat } from './chatbot';
 
 type AvailabilityStatus = 'in_stock' | 'out_of_stock' | 'unknown';
 
@@ -880,4 +881,5 @@ searchInput.addEventListener('input', () => {
 updateSortButtonLabels();
 renderCurrentPage({ triggerLazy: false });
 setInStockSyncButtonState(false);
+initPartsAdvisorChat();
 void syncAndReload();

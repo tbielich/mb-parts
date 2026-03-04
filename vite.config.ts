@@ -55,8 +55,54 @@ type PriceSnapshot = {
   prices: Record<string, PriceEntry>;
 };
 
+type ChatRecommendation = {
+  partNumber: string;
+  name: string;
+  price?: string;
+  url: string;
+  availability: Availability;
+  hierarchyGroups?: string[];
+  reason: string;
+  score: number;
+};
+
 const productDetailCache = new Map<string, ProductDetailMeta>();
 let baseSnapshotCache: PartsSnapshot | null = null;
+const CHAT_STOP_WORDS = new Set([
+  'bitte',
+  'brauche',
+  'suche',
+  'teil',
+  'teile',
+  'passend',
+  'finden',
+  'haben',
+  'hallo',
+  'und',
+  'oder',
+  'mit',
+  'für',
+  'der',
+  'die',
+  'das',
+  'ein',
+  'eine',
+  'den',
+  'dem',
+  'des',
+  'von',
+  'auf',
+  'ist',
+  'sind',
+  'ich',
+  'wir',
+  'ihr',
+  'du',
+  'im',
+  'am',
+  'zu',
+  'in',
+]);
 
 function parseLimit(value: string | null): number {
   if (value?.toLowerCase() === 'all') {
@@ -945,6 +991,114 @@ async function readRequestJson(req: NodeJS.ReadableStream): Promise<unknown> {
   return JSON.parse(raw);
 }
 
+function normalizeChatText(value: string): string {
+  return value.toLowerCase();
+}
+
+function tokenizeChatMessage(message: string): string[] {
+  const tokens = normalizeChatText(message)
+    .split(/[^a-z0-9äöüß]+/i)
+    .map((token) => token.trim())
+    .filter((token) => token.length >= 3 && !CHAT_STOP_WORDS.has(token));
+  return Array.from(new Set(tokens));
+}
+
+function extractChatPartNumbers(message: string): Set<string> {
+  const matches = message.toUpperCase().match(/\bA[\s-]*\d[\d\s-]{6,20}\b/g) ?? [];
+  return new Set(matches.map((value) => normalizePartNumber(value)).filter(Boolean));
+}
+
+function parsePriceValue(price: string | undefined): number {
+  if (!price) {
+    return Number.POSITIVE_INFINITY;
+  }
+  const normalized = price.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.');
+  const value = Number.parseFloat(normalized);
+  return Number.isFinite(value) ? value : Number.POSITIVE_INFINITY;
+}
+
+function chatWantsAvailability(message: string): boolean {
+  return /\b(lieferbar|sofort|verfügbar|verfuegbar|lager)\b/i.test(message);
+}
+
+function chatWantsLowPrice(message: string): boolean {
+  return /\b(günstig|guenstig|billig|preiswert|niedrig|preis)\b/i.test(message);
+}
+
+function rankChatRecommendations(items: PartItem[], message: string): ChatRecommendation[] {
+  const tokens = tokenizeChatMessage(message);
+  const partNumbers = extractChatPartNumbers(message);
+  const wantsAvailability = chatWantsAvailability(message);
+  const wantsLowPrice = chatWantsLowPrice(message);
+
+  const scored = items
+    .map((item) => {
+      const name = normalizeChatText(item.name);
+      const hierarchy = (item.hierarchyGroups ?? []).map((group) => normalizeChatText(group)).join(' ');
+      const reasons: string[] = [];
+      let score = 0;
+
+      if (partNumbers.has(item.partNumber)) {
+        score += 120;
+        reasons.push('Exakte Teilenummer erkannt');
+      }
+
+      for (const token of tokens) {
+        if (item.partNumber.toLowerCase().includes(token)) {
+          score += 20;
+          reasons.push(`Nummer enthält "${token}"`);
+          continue;
+        }
+        if (name.includes(token)) {
+          score += 12;
+          reasons.push(`Name passt zu "${token}"`);
+          continue;
+        }
+        if (hierarchy.includes(token)) {
+          score += 8;
+          reasons.push(`Gruppe passt zu "${token}"`);
+        }
+      }
+
+      if (item.availability.status === 'in_stock') {
+        score += 4;
+        if (wantsAvailability) {
+          score += 12;
+          reasons.push('Aktuell verfügbar');
+        }
+      }
+
+      const priceValue = parsePriceValue(item.price);
+      if (wantsLowPrice && Number.isFinite(priceValue)) {
+        score += Math.max(0, 25 - Math.min(priceValue / 10, 25));
+      }
+
+      return { item, score, reasons: Array.from(new Set(reasons)), priceValue };
+    })
+    .filter((entry) => entry.score > 0)
+    .sort((left, right) => {
+      if (right.score !== left.score) {
+        return right.score - left.score;
+      }
+      if (left.priceValue !== right.priceValue) {
+        return left.priceValue - right.priceValue;
+      }
+      return left.item.partNumber.localeCompare(right.item.partNumber);
+    })
+    .slice(0, 3);
+
+  return scored.map((entry) => ({
+    partNumber: entry.item.partNumber,
+    name: entry.item.name,
+    price: entry.item.price,
+    url: entry.item.url,
+    availability: entry.item.availability,
+    hierarchyGroups: entry.item.hierarchyGroups ?? [],
+    reason: entry.reasons[0] ?? 'Katalog-Match',
+    score: entry.score,
+  }));
+}
+
 async function getBaseSnapshot(): Promise<PartsSnapshot> {
   if (baseSnapshotCache) {
     return baseSnapshotCache;
@@ -1183,6 +1337,59 @@ export default defineConfig({
                   entries: result.entries,
                 }),
               );
+            } catch (error) {
+              res.statusCode = 502;
+              res.setHeader('Content-Type', 'application/json; charset=utf-8');
+              res.end(
+                JSON.stringify({
+                  ok: false,
+                  error: error instanceof Error ? error.message : 'Unknown error',
+                }),
+              );
+            }
+            return;
+          }
+
+          if (req.method === 'POST' && requestUrl.pathname === '/api/chat') {
+            try {
+              const body = (await readRequestJson(req)) as { message?: string };
+              const message = String(body.message ?? '').trim();
+              if (!message) {
+                res.statusCode = 400;
+                res.setHeader('Content-Type', 'application/json; charset=utf-8');
+                res.end(JSON.stringify({ ok: false, error: 'message is required' }));
+                return;
+              }
+
+              const snapshot = await getBaseSnapshot();
+              const recommendations = rankChatRecommendations(snapshot.items ?? [], message);
+              const responsePayload =
+                recommendations.length === 0
+                  ? {
+                      ok: true,
+                      answer:
+                        `Ich habe in unserem Katalog aktuell keinen klaren Treffer für "${message}" gefunden. ` +
+                        'Bitte nenne mir möglichst Teilenummer, Fahrzeugmodell, Baujahr oder die VIN.',
+                      followUpQuestions: [
+                        'Welche MB-Baureihe und welches Baujahr hat das Fahrzeug?',
+                        'Hast du eine OEM-/Teilenummer vom Altteil?',
+                      ],
+                      recommendations: [],
+                    }
+                  : {
+                      ok: true,
+                      answer:
+                        'Ich habe passende Teile aus dem Katalog priorisiert. Bitte vor Bestellung immer mit VIN/FIN gegenprüfen.',
+                      followUpQuestions: [
+                        'Soll ich stärker nach Lieferbarkeit oder nach Preis priorisieren?',
+                        'Wenn du mir Modell + Baujahr nennst, kann ich die Auswahl weiter eingrenzen.',
+                      ],
+                      recommendations,
+                    };
+
+              res.statusCode = 200;
+              res.setHeader('Content-Type', 'application/json; charset=utf-8');
+              res.end(JSON.stringify(responsePayload));
             } catch (error) {
               res.statusCode = 502;
               res.setHeader('Content-Type', 'application/json; charset=utf-8');
