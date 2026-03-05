@@ -1,10 +1,19 @@
 import * as cheerio from 'cheerio';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, unlink, writeFile } from 'node:fs/promises';
+import { execFile } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
+import { promisify } from 'node:util';
 
 const BASE_URL = 'https://mb-teilekatalog.info';
 const OUTPUT_PATH = resolve(process.cwd(), 'public/data/parts-diagram-map.json');
 const DIAGRAMS_OUTPUT_DIR = resolve(process.cwd(), 'public/data/diagrams');
+const IMAGE_NAME_PREFIX = 'group-';
+const TARGET_IMAGE_WIDTH = 960;
+const TARGET_IMAGE_HEIGHT = 640;
+const BORDER_SIZE = 20;
+const TRIM_FUZZ = '5%';
+const SHAVE_SIZE = '2x2';
+const execFileAsync = promisify(execFile);
 
 function parseArgs(argv) {
   const args = {
@@ -87,6 +96,163 @@ function normalizeText(value) {
 
 function normalizePartNumber(value) {
   return normalizeText(value).toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
+function buildDiagramFileName(index) {
+  return `${IMAGE_NAME_PREFIX}${String(index).padStart(3, '0')}.png`;
+}
+
+async function runMagick(args) {
+  const { stdout } = await execFileAsync('magick', args, { maxBuffer: 10 * 1024 * 1024 });
+  return String(stdout ?? '').trim();
+}
+
+function parseTrimMetrics(metrics) {
+  const match = String(metrics).trim().match(/^(\d+)x(\d+)\|([+-]\d+)\|([+-]\d+)$/);
+  if (!match) {
+    throw new Error(`Unexpected trim metrics format: ${metrics}`);
+  }
+
+  return {
+    width: Number.parseInt(match[1], 10),
+    height: Number.parseInt(match[2], 10),
+    x: Number.parseInt(match[3], 10),
+    y: Number.parseInt(match[4], 10),
+  };
+}
+
+function parseSize(sizeText) {
+  const match = String(sizeText).trim().match(/^(\d+)x(\d+)$/);
+  if (!match) {
+    throw new Error(`Unexpected resize format: ${sizeText}`);
+  }
+  return {
+    width: Number.parseInt(match[1], 10),
+    height: Number.parseInt(match[2], 10),
+  };
+}
+
+function parseShaveSize(shaveText) {
+  const match = String(shaveText).trim().match(/^(\d+)x(\d+)$/);
+  if (!match) {
+    throw new Error(`Unexpected shave format: ${shaveText}`);
+  }
+  return {
+    x: Number.parseInt(match[1], 10),
+    y: Number.parseInt(match[2], 10),
+  };
+}
+
+async function processDiagramImage(downloadedBinary, targetPath) {
+  const sourcePath = `${targetPath}.source.png`;
+  await writeFile(sourcePath, downloadedBinary);
+
+  try {
+    const shave = parseShaveSize(SHAVE_SIZE);
+    const trimMetricsRaw = await runMagick([
+      sourcePath,
+      '-bordercolor',
+      'white',
+      '-border',
+      String(BORDER_SIZE),
+      '-fuzz',
+      TRIM_FUZZ,
+      '-trim',
+      '-format',
+      '%wx%h|%X|%Y',
+      'info:',
+    ]);
+    const trimGeometry = parseTrimMetrics(trimMetricsRaw);
+
+    const preResizeSizeRaw = await runMagick([
+      sourcePath,
+      '-bordercolor',
+      'white',
+      '-border',
+      String(BORDER_SIZE),
+      '-fuzz',
+      TRIM_FUZZ,
+      '-trim',
+      '+repage',
+      '-shave',
+      SHAVE_SIZE,
+      '-format',
+      '%wx%h',
+      'info:',
+    ]);
+    const preResizeSize = parseSize(preResizeSizeRaw);
+
+    await runMagick([
+      sourcePath,
+      '-bordercolor',
+      'white',
+      '-border',
+      String(BORDER_SIZE),
+      '-fuzz',
+      TRIM_FUZZ,
+      '-trim',
+      '+repage',
+      '-shave',
+      SHAVE_SIZE,
+      '-resize',
+      `${TARGET_IMAGE_WIDTH}x${TARGET_IMAGE_HEIGHT}!`,
+      targetPath,
+    ]);
+
+    return {
+      offsetX: BORDER_SIZE - trimGeometry.x - shave.x,
+      offsetY: BORDER_SIZE - trimGeometry.y - shave.y,
+      scaleX: preResizeSize.width > 0 ? TARGET_IMAGE_WIDTH / preResizeSize.width : 1,
+      scaleY: preResizeSize.height > 0 ? TARGET_IMAGE_HEIGHT / preResizeSize.height : 1,
+    };
+  } finally {
+    try {
+      await unlink(sourcePath);
+    } catch {
+      // ignore temp cleanup failures
+    }
+  }
+}
+
+function transformCoords(coords, shape, transform) {
+  if (!coords || !transform) {
+    return coords;
+  }
+
+  const values = String(coords)
+    .split(',')
+    .map((part) => Number.parseFloat(part.trim()))
+    .filter((value) => Number.isFinite(value));
+
+  if (values.length === 0) {
+    return coords;
+  }
+
+  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+  const mapPoint = (x, y) => {
+    const tx = clamp(Math.round((x + transform.offsetX) * transform.scaleX), 0, TARGET_IMAGE_WIDTH - 1);
+    const ty = clamp(Math.round((y + transform.offsetY) * transform.scaleY), 0, TARGET_IMAGE_HEIGHT - 1);
+    return [tx, ty];
+  };
+
+  const normalizedShape = normalizeText(shape).toLowerCase();
+  if (normalizedShape === 'circle' && values.length >= 3) {
+    const [cx, cy] = mapPoint(values[0], values[1]);
+    const radius = Math.max(1, Math.round(values[2] * ((transform.scaleX + transform.scaleY) / 2)));
+    return `${cx},${cy},${radius}`;
+  }
+
+  if (values.length < 2) {
+    return coords;
+  }
+
+  const transformed = [];
+  for (let i = 0; i + 1 < values.length; i += 2) {
+    const [tx, ty] = mapPoint(values[i], values[i + 1]);
+    transformed.push(tx, ty);
+  }
+
+  return transformed.join(',');
 }
 
 function extractGroupIds(groupHtml) {
@@ -246,7 +412,8 @@ async function main() {
   console.log(`[diagram-import] groups found: ${groupIds.length}`);
 
   await mkdir(DIAGRAMS_OUTPUT_DIR, { recursive: true });
-  const localImagePathByRemoteUrl = new Map();
+  const localImageByRemoteUrl = new Map();
+  let nextDiagramIndex = 1;
 
   const mappingsByPartNumber = {};
   const subgroupPages = [];
@@ -280,33 +447,22 @@ async function main() {
       const subgroupHtml = await fetchHtml(subgroupUrl);
       const diagram = extractDiagramData(subgroupHtml);
       let localImageUrl;
+      let coordTransform;
 
       if (diagram.imageUrl) {
-        const cached = localImagePathByRemoteUrl.get(diagram.imageUrl);
+        const cached = localImageByRemoteUrl.get(diagram.imageUrl);
         if (cached) {
-          localImageUrl = cached;
+          localImageUrl = cached.localImageUrl;
+          coordTransform = cached.coordTransform;
         } else {
-          const urlObj = new URL(diagram.imageUrl);
-          const fileName = urlObj.pathname.split('/').pop() ?? `${groupId}-${subgroupId}.png`;
+          const fileName = buildDiagramFileName(nextDiagramIndex);
+          nextDiagramIndex += 1;
           const targetPath = resolve(DIAGRAMS_OUTPUT_DIR, fileName);
           const binary = await downloadBinary(diagram.imageUrl);
-
-          let shouldWrite = true;
-          try {
-            const existing = await readFile(targetPath);
-            if (Buffer.compare(existing, binary) === 0) {
-              shouldWrite = false;
-            }
-          } catch {
-            // file does not exist yet
-          }
-
-          if (shouldWrite) {
-            await writeFile(targetPath, binary);
-          }
+          coordTransform = await processDiagramImage(binary, targetPath);
 
           localImageUrl = `/data/diagrams/${fileName}`;
-          localImagePathByRemoteUrl.set(diagram.imageUrl, localImageUrl);
+          localImageByRemoteUrl.set(diagram.imageUrl, { localImageUrl, coordTransform });
         }
       }
 
@@ -323,6 +479,7 @@ async function main() {
           sourceUrl: subgroupUrl,
           sourceImageUrl: item.imageUrl,
           ...item,
+          coords: transformCoords(item.coords, item.shape, coordTransform),
           imageUrl: localImageUrl,
         };
 
