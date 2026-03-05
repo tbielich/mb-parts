@@ -54,10 +54,52 @@ npm run build
 - `npm run migrate` – JSON Snapshot -> NDJSON
 - `npm run chunk:index` – NDJSON -> Chunk-Index
 - `npm run build` – Build inkl. Datenvorbereitung
+- `npm run build:netlify` – Netlify-Build inkl. SVG-Render mit Binary-Check
 - `npm run typecheck` – TypeScript-Check ohne Build-Artefakte
 - `npm run test` – Platzhalter (`not configured`)
 - `npm run lint` – Platzhalter (`not configured`)
 - `npm run format` – Platzhalter (`not configured`)
+- `npm run render:png` – Diagramm-PNGs importieren/aufbereiten
+- `npm run render:svg` – Diagramm-SVGs erzeugen (Default: `public/data/diagrams-960`, Fallback: `public/data/diagrams`)
+- `npm run render:svg:ci` – `render:svg` nur ausführen, wenn benötigte Binaries vorhanden sind
+- `npm run render:all` – `render:png` + `render:svg`
+
+## Diagramm-Vektorisierung (SVG + OCR-Anker)
+
+Prerequisites (macOS/Homebrew):
+
+```bash
+brew install vtracer potrace imagemagick tesseract
+```
+
+Standardlauf:
+
+```bash
+npm run render:svg
+```
+
+Optional mit Parametern:
+
+```bash
+node scripts/render-svg-with-ocr.mjs --in public/data/diagrams-960 --out public/data/diagrams-svg --engine auto --ocr-threshold 60
+```
+
+Output:
+
+- Input-PNGs: `public/data/diagrams-960/*.png` (oder Fallback `public/data/diagrams/*.png`)
+- Output-SVGs: `public/data/diagrams-svg/*.svg`
+
+Die SVGs enthalten:
+
+- `<g id="art">` (vektorisierte Linienzeichnung)
+- `<g id="labels">` (OCR-Zahlen als selektierbarer Text)
+- Anker-IDs pro Label: `id=\"pos-N\"` + `href=\"#pos-N\"`
+
+Netlify-Workflow:
+
+- Der Build nutzt `npm run build:netlify` (siehe `netlify.toml`).
+- `build:netlify` ruft `render:svg:ci` auf.
+- Falls `vtracer`/`potrace+magick` oder `tesseract` fehlen, wird SVG-Generierung übersprungen und mit vorhandenen SVGs + PNG-Fallback weitergebaut.
 
 ## API Endpoints
 
@@ -130,7 +172,7 @@ Response (gekürzt):
 
 ## Deployment (Netlify)
 
-- Build command: `npm run build`
+- Build command: `npm run build:netlify`
 - Publish dir: `dist`
 - Functions dir: `netlify/functions`
 

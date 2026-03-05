@@ -109,6 +109,30 @@ function normalizeText(value: string | undefined): string {
   return String(value ?? '').replace(/\s+/g, ' ').trim();
 }
 
+function resolveDiagramImageSources(imageUrl: string): { primary: string; fallback?: string } {
+  const normalized = normalizeText(imageUrl);
+  if (!normalized) {
+    return { primary: '' };
+  }
+
+  const lower = normalized.toLowerCase();
+  if (lower.endsWith('.png') && normalized.includes('/data/diagrams/')) {
+    return {
+      primary: normalized.replace('/data/diagrams/', '/data/diagrams-svg/').replace(/\.png$/i, '.svg'),
+      fallback: normalized,
+    };
+  }
+
+  if (lower.endsWith('.svg') && normalized.includes('/data/diagrams-svg/')) {
+    return {
+      primary: normalized,
+      fallback: normalized.replace('/data/diagrams-svg/', '/data/diagrams/').replace(/\.svg$/i, '.png'),
+    };
+  }
+
+  return { primary: normalized };
+}
+
 function normalizePosition(value: string | undefined): string {
   const raw = normalizeText(value);
   return raw || '-';
@@ -374,7 +398,15 @@ function selectSubgroup(view: SubgroupView): void {
   diagramOpenLink.href = view.sourceUrl;
 
   if (view.imageUrl) {
-    diagramImage.src = view.imageUrl;
+    const sources = resolveDiagramImageSources(view.imageUrl);
+    diagramImage.onerror = null;
+    if (sources.fallback) {
+      diagramImage.onerror = () => {
+        diagramImage.onerror = null;
+        diagramImage.src = sources.fallback ?? '';
+      };
+    }
+    diagramImage.src = sources.primary;
     diagramImage.alt = `Teilegrafik Gruppe ${view.group} Unterseite ${view.subgroup}`;
     diagramImage.style.display = 'block';
   } else {
