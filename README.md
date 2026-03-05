@@ -54,6 +54,10 @@ npm run build
 - `npm run migrate` – JSON Snapshot -> NDJSON
 - `npm run chunk:index` – NDJSON -> Chunk-Index
 - `npm run build` – Build inkl. Datenvorbereitung
+- `npm run typecheck` – TypeScript-Check ohne Build-Artefakte
+- `npm run test` – Platzhalter (`not configured`)
+- `npm run lint` – Platzhalter (`not configured`)
+- `npm run format` – Platzhalter (`not configured`)
 
 ## API Endpoints
 

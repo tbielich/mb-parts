@@ -85,6 +85,8 @@ const diagramImage = getRequiredElement<HTMLImageElement>('#diagram-image');
 const diagramMap = getRequiredElement<HTMLMapElement>('#diagram-map');
 const diagramOpenLink = getRequiredElement<HTMLAnchorElement>('#diagram-open-link');
 const partsBody = getRequiredElement<HTMLTableSectionElement>('#diagram-parts-body');
+const NO_ORIGINAL_LABEL = '(Kein Original)';
+const NO_ORIGINAL_INLINE_LABEL = `\u00A0${NO_ORIGINAL_LABEL}`;
 
 let activePosition = '';
 const catalogByPartNumber = new Map<string, CatalogPart>();
@@ -147,6 +149,29 @@ function normalizePrice(value: string | undefined): string {
   return raw.replaceAll('*', '').trim() || '-';
 }
 
+function normalizePartName(value: string | undefined): string {
+  const raw = normalizeText(value)
+    .replaceAll('_', ' ')
+    .replace(/\s*\/\s*/g, ' / ')
+    .replace(/(\d)\s*[xX]\s*(\d)/g, '$1×$2')
+    .replace(/Ersetzt durch:\s*•\s*\+\s*♦\s*Wahlweise mit:/gi, NO_ORIGINAL_INLINE_LABEL)
+    .replace(/•\s*\+\s*♦\s*Wahlweise mit:/gi, NO_ORIGINAL_INLINE_LABEL)
+    .replace(/\s*\(kein original\)/gi, NO_ORIGINAL_INLINE_LABEL);
+  if (!raw || raw === '-') {
+    return '-';
+  }
+
+  const lower = raw.toLowerCase();
+  const withUmlauts = lower
+    .replace(/ae/g, 'ä')
+    .replace(/(^|[^q])ue/g, (_match, prefix: string) => `${prefix}ü`);
+
+  return withUmlauts
+    .replace(/(^|[\s/(),.-]+)(\p{L})/gu, (_match, prefix: string, letter: string) => `${prefix}${letter.toUpperCase()}`)
+    .replaceAll('Ü', 'ü')
+    .replaceAll('Ä', 'ä');
+}
+
 function isOriginalteileUrl(value: string | undefined): boolean {
   const url = normalizeText(value);
   if (!url) {
@@ -183,6 +208,14 @@ function getCatalogPart(entry: DiagramEntry): CatalogPart {
     url: entry.sourceUrl,
     availability: { status: 'unknown', label: 'Unbekannt' },
   };
+}
+
+function resolveDisplayPartName(entry: DiagramEntry, catalogPart: CatalogPart): string {
+  const catalogName = normalizePartName(catalogPart.name);
+  if (catalogName !== '-') {
+    return catalogName;
+  }
+  return normalizePartName(entry.description);
 }
 
 function buildSubgroupViews(data: DiagramMap): Map<string, SubgroupView> {
@@ -256,15 +289,16 @@ function renderPartRows(entries: DiagramEntry[]): void {
       const posKey = positionKey(entry.position);
       const availability = getAvailability(catalogPart.availability);
       const hasOriginalLink = isOriginalteileUrl(catalogPart.url);
+      const displayName = resolveDisplayPartName(entry, catalogPart);
       const preferredUrl = hasOriginalLink ? resolvePreferredPartUrl(catalogPart.url, entry.sourceUrl) : '';
       const linkCell = hasOriginalLink
         ? `<a href="${escapeHtml(preferredUrl)}" target="_blank" rel="noopener" aria-label="${escapeHtml(partLabel)}" title="${escapeHtml(partLabel)}">Prüfen</a>`
-        : '<span class="no-original">Kein Original</span>';
+        : `<span class="no-original">${escapeHtml(NO_ORIGINAL_INLINE_LABEL)}</span>`;
       return `
         <tr class="parts-row" data-position="${escapeHtml(posKey)}">
           <td>${escapeHtml(normalizePosition(entry.position))}</td>
           <td>${escapeHtml(catalogPart.partNumber)}</td>
-          <td>${escapeHtml(normalizeText(catalogPart.name) || '-')}</td>
+          <td>${escapeHtml(displayName)}</td>
           <td>${escapeHtml(normalizePrice(catalogPart.price))}</td>
           <td><span class="badge badge-${escapeHtml(availability.status)}">${escapeHtml(availability.label)}</span></td>
           <td>${linkCell}</td>
@@ -336,7 +370,7 @@ function highlightPosition(position: string, options: { scroll: boolean }): void
 
 function selectSubgroup(view: SubgroupView): void {
   const groupLabel = groupLabelByCode.get(view.group) ?? `Unterseite ${view.subgroup}`;
-  selectionTitle.textContent = `${groupLabel} · Unterseite ${view.subgroup}`;
+  selectionTitle.textContent = groupLabel;
   diagramOpenLink.href = view.sourceUrl;
 
   if (view.imageUrl) {
@@ -354,7 +388,23 @@ function selectSubgroup(view: SubgroupView): void {
   if (activePosition) {
     highlightPosition(activePosition, { scroll: false });
   }
-  setStatus(`Fertig: Gruppe ${view.group}, Unterseite ${view.subgroup}, Teile ${view.entries.length}`);
+  setStatus(`Fertig: Gruppe ${view.group}, Teile ${view.entries.length}`);
+}
+
+function buildGroupHash(groupCode: string): string {
+  return `#group-${encodeURIComponent(groupCode)}`;
+}
+
+function readGroupFromHash(hash: string): string {
+  const prefix = '#group-';
+  if (!hash.startsWith(prefix)) {
+    return '';
+  }
+  try {
+    return decodeURIComponent(hash.slice(prefix.length));
+  } catch {
+    return '';
+  }
 }
 
 function renderNavigation(subgroups: Map<string, SubgroupView>, groupMeta: Record<string, string>): void {
@@ -378,31 +428,63 @@ function renderNavigation(subgroups: Map<string, SubgroupView>, groupMeta: Recor
       const hasEntries = pages.some((page) => page.entries.length > 0);
       const label = normalizeGroupLabel(groupMeta[groupCode]);
       groupLabelByCode.set(groupCode, label);
-      return `<button class="group-nav-btn${hasEntries ? '' : ' is-inactive'}" type="button" data-group="${escapeHtml(groupCode)}" ${hasEntries ? '' : 'disabled aria-disabled="true"'}>${escapeHtml(label)}</button>`;
+      if (!hasEntries) {
+        return `<span class="group-nav-link is-inactive" aria-disabled="true">${escapeHtml(label)}</span>`;
+      }
+      const href = buildGroupHash(groupCode);
+      return `<a class="group-nav-link" href="${escapeHtml(href)}" data-group="${escapeHtml(groupCode)}">${escapeHtml(label)}</a>`;
     })
     .join('');
 
-  groupList.querySelectorAll<HTMLButtonElement>('.group-nav-btn').forEach((button) => {
-    button.addEventListener('click', () => {
-      const group = button.dataset.group ?? '';
-      const pages = (byGroup.get(group) ?? []).sort((a, b) => a.subgroup.localeCompare(b.subgroup));
-      const selected = pages[0];
-      if (!selected) {
-        return;
-      }
-
-      groupList.querySelectorAll<HTMLButtonElement>('.group-nav-btn').forEach((item) => {
-        item.classList.remove('is-active');
-      });
-      button.classList.add('is-active');
-      selectSubgroup(selected);
-    });
+  const availableGroups = sortedGroups.filter((groupCode) => {
+    const pages = byGroup.get(groupCode) ?? [];
+    return pages.some((page) => page.entries.length > 0);
   });
 
-  const firstButton = groupList.querySelector<HTMLButtonElement>('.group-nav-btn:not(.is-inactive)');
-  if (firstButton) {
-    firstButton.click();
-  }
+  const selectGroup = (groupCode: string): boolean => {
+    if (!groupCode) {
+      return false;
+    }
+    const pages = (byGroup.get(groupCode) ?? []).sort((a, b) => a.subgroup.localeCompare(b.subgroup));
+    const selected = pages[0];
+    if (!selected || selected.entries.length === 0) {
+      return false;
+    }
+
+    groupList.querySelectorAll<HTMLAnchorElement>('.group-nav-link[data-group]').forEach((item) => {
+      const isActive = (item.dataset.group ?? '') === groupCode;
+      item.classList.toggle('is-active', isActive);
+      if (isActive) {
+        item.setAttribute('aria-current', 'page');
+      } else {
+        item.removeAttribute('aria-current');
+      }
+    });
+
+    selectSubgroup(selected);
+    return true;
+  };
+
+  const applyHashSelection = (): void => {
+    const groupFromHash = readGroupFromHash(window.location.hash);
+    if (groupFromHash && selectGroup(groupFromHash)) {
+      return;
+    }
+
+    const firstGroup = availableGroups[0];
+    if (!firstGroup) {
+      return;
+    }
+
+    selectGroup(firstGroup);
+    const fallbackHash = buildGroupHash(firstGroup);
+    if (window.location.hash !== fallbackHash) {
+      window.history.replaceState(null, '', fallbackHash);
+    }
+  };
+
+  window.addEventListener('hashchange', applyHashSelection);
+  applyHashSelection();
 }
 
 async function loadGroupsPage(): Promise<void> {

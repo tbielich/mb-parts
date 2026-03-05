@@ -105,7 +105,8 @@ body {
   gap: 0.4rem;
 }
 
-.group-nav-btn {
+.group-nav-link {
+  display: block;
   font-family: var(--ui-font);
   border: 1px solid var(--border);
   background: var(--card);
@@ -113,25 +114,26 @@ body {
   border-radius: 0.5rem;
   padding: 0.45rem 0.55rem;
   text-align: left;
+  text-decoration: none;
   cursor: pointer;
 }
 
-.group-nav-btn:hover {
+.group-nav-link:hover {
   border-color: var(--accent);
 }
 
-.group-nav-btn.is-active {
+.group-nav-link.is-active {
   background: color-mix(in srgb, var(--accent) 10%, #fff);
   border-color: var(--accent);
   color: #0f172a;
   font-weight: 700;
 }
 
-.group-nav-btn.is-inactive {
+.group-nav-link.is-inactive {
   color: var(--muted);
   background: #f3f4f6;
   border-style: dashed;
-  cursor: not-allowed;
+  cursor: default;
 }
 
 .groups-content {
@@ -192,6 +194,11 @@ body {
   border-bottom: 1px solid var(--border);
   text-align: left;
   vertical-align: top;
+}
+
+.parts-card th:nth-child(4),
+.parts-card td:nth-child(4) {
+  white-space: nowrap;
 }
 
 .parts-card th {
