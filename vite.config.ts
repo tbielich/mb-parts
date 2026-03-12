@@ -1248,6 +1248,7 @@ export default defineConfig({
       input: {
         main: resolve(process.cwd(), 'index.html'),
         groups: resolve(process.cwd(), 'groups.html'),
+        impressum: resolve(process.cwd(), 'impressum/index.html'),
       },
     },
   },

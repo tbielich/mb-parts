@@ -312,11 +312,86 @@ input:focus-visible {
 
 .pagination {
   font-family: var(--ui-font);
-  margin-top: 0.9rem;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 0.6rem;
+}
+
+.app-footer {
+  margin-top: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.footer-links {
+  font-family: var(--ui-font);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.footer-links a {
+  color: var(--accent);
+}
+
+.legal-page {
+  max-width: 900px;
+}
+
+.legal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.legal-header h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+}
+
+.legal-subtitle {
+  margin: 0.35rem 0 0;
+  font-family: var(--ui-font);
+  color: var(--muted);
+}
+
+.legal-card {
+  font-family: var(--ui-font);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--card);
+  padding: 1.25rem;
+  box-shadow: 0 12px 30px rgb(15 23 42 / 6%);
+}
+
+.legal-card h2 {
+  font-family: "Old Standard TT", Georgia, "Times New Roman", serif;
+  margin: 0 0 0.85rem;
+  font-size: 1.45rem;
+}
+
+.legal-card ul {
+  margin: 0 0 1.25rem;
+  padding-left: 1.2rem;
+}
+
+.legal-card li,
+.legal-card p {
+  line-height: 1.6;
+}
+
+.legal-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
 }
 
 .page-info {
@@ -514,6 +589,12 @@ input:focus-visible {
 
   .pagination {
     justify-content: space-between;
+  }
+
+  .app-footer,
+  .legal-header {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .parts-chat {
