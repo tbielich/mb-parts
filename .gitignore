@@ -6,6 +6,7 @@ dist/
 .env
 .env.local
 /data/
+outputs/
 public/data/vehicles/
 public/data/parts-base.json
 public/data/parts-price.json

@@ -1,0 +1,46 @@
+Create a vintage 1970s automotive spare-parts catalog illustration in the style of a Mercedes-Benz workshop manual.
+
+STYLE
+•⁠  ⁠Pure grayscale only: black, white, and neutral gray tones.
+•⁠  ⁠No color tint, no sepia, no warm/cool cast.
+•⁠  ⁠Clean white background.
+•⁠  ⁠Printed technical illustration look.
+•⁠  ⁠Subtle “engraving / copperplate” aesthetic.
+•⁠  ⁠Very fine linework with restrained shading.
+•⁠  ⁠Shading only as:
+  - delicate hatch-like strokes, or
+  - very smooth tonal gray areas.
+•⁠  ⁠No halftone dots.
+•⁠  ⁠No comic look.
+•⁠  ⁠No painterly brushwork.
+•⁠  ⁠No paper texture, no scan grain, no noise.
+
+LINE QUALITY
+•⁠  ⁠Outer contours of large components slightly thicker.
+•⁠  ⁠Inner construction/detail lines thinner and precise.
+•⁠  ⁠Small parts remain crisp, technical, and exact.
+•⁠  ⁠Leader lines thin and unobtrusive.
+•⁠  ⁠Position numbers clean, readable, and not stylized.
+
+COMPOSITION
+•⁠  ⁠Maintain the original exploded-view layout exactly.
+•⁠  ⁠Preserve distances and arrangement between parts.
+•⁠  ⁠Keep all labels, callouts, part numbers, and leader lines.
+•⁠  ⁠Do not crop off annotations.
+•⁠  ⁠Center the drawing with comfortable white margins.
+
+TECHNICAL CHARACTER
+•⁠  ⁠Looks like a cleaned and refined OEM spare-parts book illustration.
+•⁠  ⁠High legibility, precise geometry, mechanically faithful.
+•⁠  ⁠Sharp edges, consistent line hierarchy, controlled contrast.
+•⁠  ⁠Overall impression: archival Mercedes parts catalog / workshop manual plate.
+
+NEGATIVE STYLE CONSTRAINTS
+•⁠  ⁠No added parts.
+•⁠  ⁠No removed parts.
+•⁠  ⁠No redesigned geometry.
+•⁠  ⁠No dramatic shadows.
+•⁠  ⁠No photorealism.
+•⁠  ⁠No 3D rendering look.
+•⁠  ⁠No watercolor, charcoal, pencil sketch, cartoon, manga, or poster style.
+•⁠  ⁠No decorative background.

@@ -1,0 +1,20 @@
+{
+  "model": "gpt-image-1",
+  "inputGlob": "public/data/diagrams/group-*.png",
+  "outDir": "outputs",
+  "promptFile": "img.prompt.txt",
+  "api": {
+    "size": "1536x1024",
+    "output_format": "png",
+    "background": "opaque",
+    "input_fidelity": "high",
+    "n": 1
+  },
+  "post": {
+    "trim": true,
+    "trimThreshold": 10,
+    "marginPx": 18,
+    "finalCanvas": { "width": 1536, "height": 1024 },
+    "enforcePureWhite": true
+  }
+}

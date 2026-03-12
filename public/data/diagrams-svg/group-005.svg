@@ -193,5 +193,9 @@
     m60 -59 c9 -16 -20 -41 -39 -33 -17 6 -22 25 -10 37 10 11 41 8 49 -4z"/>
     </g>
   </g>
-  <g id="labels" font-family="Helvetica, Arial, sans-serif" fill="#111" font-size="14"></g>
+  <g id="labels" font-family="Helvetica, Arial, sans-serif" fill="#111" font-size="14" text-rendering="geometricPrecision" opacity="0" pointer-events="none">
+      <a id="pos-11" href="#pos-11"><text data-pos="11" x="670" y="154" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">11</text></a>
+      <a id="pos-16" href="#pos-16"><text data-pos="16" x="779" y="325" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">16</text></a>
+      <a id="pos-20" href="#pos-20"><text data-pos="20" x="553" y="207" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">20</text></a>
+  </g>
 </svg>

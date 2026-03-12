@@ -15,6 +15,7 @@
     "render:png": "npm run import:diagrams",
     "render:svg": "node scripts/render-svg-with-ocr.mjs",
     "render:svg:ci": "node scripts/render-svg-if-available.mjs",
+    "render": "node scripts/render-images.mjs mb_catalog.config.json",
     "render:all": "npm run render:png && npm run render:svg",
     "migrate": "tsc --target ES2022 --module NodeNext --moduleResolution NodeNext --outDir .tmp/migrate scripts/migrate-to-ndjson.ts && node .tmp/migrate/migrate-to-ndjson.js",
     "chunk:index": "tsc --target ES2022 --module NodeNext --moduleResolution NodeNext --outDir .tmp/migrate scripts/chunk-ndjson.ts && node .tmp/migrate/chunk-ndjson.js --vehicleKey default",
@@ -33,6 +34,9 @@
     "vite": "^7.1.3"
   },
   "dependencies": {
-    "cheerio": "^1.1.2"
+    "cheerio": "^1.1.2",
+    "dotenv": "^17.2.3",
+    "fast-glob": "^3.3.3",
+    "sharp": "^0.34.4"
   }
 }

@@ -440,5 +440,7 @@
     -25 -15 -25 -18 0 -20 21 -3 38 17 17 18 16 18 -13z"/>
     </g>
   </g>
-  <g id="labels" font-family="Helvetica, Arial, sans-serif" fill="#111" font-size="14"></g>
+  <g id="labels" font-family="Helvetica, Arial, sans-serif" fill="#111" font-size="14" text-rendering="geometricPrecision" opacity="0" pointer-events="none">
+      <a id="pos-34" href="#pos-34"><text data-pos="34" x="412" y="491" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">34</text></a>
+  </g>
 </svg>

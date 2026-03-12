@@ -472,5 +472,12 @@
     23 4 19 10 -7 11 -48 14 -58 3z"/>
     </g>
   </g>
-  <g id="labels" font-family="Helvetica, Arial, sans-serif" fill="#111" font-size="14"></g>
+  <g id="labels" font-family="Helvetica, Arial, sans-serif" fill="#111" font-size="14" text-rendering="geometricPrecision" opacity="0" pointer-events="none">
+      <a id="pos-10" href="#pos-10"><text data-pos="10" x="170" y="378" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">10</text></a>
+      <a id="pos-15" href="#pos-15"><text data-pos="15" x="276" y="437" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">15</text></a>
+      <a id="pos-25" href="#pos-25"><text data-pos="25" x="206" y="425" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">25</text></a>
+      <a id="pos-30" href="#pos-30"><text data-pos="30" x="587" y="421" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">30</text></a>
+      <a id="pos-35" href="#pos-35"><text data-pos="35" x="418" y="378" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">35</text></a>
+      <a id="pos-40" href="#pos-40"><text data-pos="40" x="822" y="268" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">40</text></a>
+  </g>
 </svg>

@@ -736,5 +736,35 @@
     12 9 21 3 25 -6 3 -10 24 -10 46 0 28 -4 39 -15 39 -12 0 -13 -9 -8 -45z"/>
     </g>
   </g>
-  <g id="labels" font-family="Helvetica, Arial, sans-serif" fill="#111" font-size="14"></g>
+  <g id="labels" font-family="Helvetica, Arial, sans-serif" fill="#111" font-size="14" text-rendering="geometricPrecision" opacity="0" pointer-events="none">
+      <a id="pos-5" href="#pos-5"><text data-pos="5" x="341" y="201" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">5</text></a>
+      <a id="pos-7" href="#pos-7"><text data-pos="7" x="323" y="170" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">7</text></a>
+      <a id="pos-10" href="#pos-10"><text data-pos="10" x="228" y="358" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">10</text></a>
+      <a id="pos-15" href="#pos-15"><text data-pos="15" x="319" y="388" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">15</text></a>
+      <a id="pos-23" href="#pos-23"><text data-pos="23" x="314" y="360" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">23</text></a>
+      <a id="pos-27" href="#pos-27"><text data-pos="27" x="388" y="232" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">27</text></a>
+      <a id="pos-32" href="#pos-32"><text data-pos="32" x="367" y="284" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">32</text></a>
+      <a id="pos-38" href="#pos-38"><text data-pos="38" x="894" y="447" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">38</text></a>
+      <a id="pos-42" href="#pos-42"><text data-pos="42" x="816" y="599" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">42</text></a>
+      <a id="pos-48" href="#pos-48"><text data-pos="48" x="577" y="174" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">48</text></a>
+      <a id="pos-53" href="#pos-53"><text data-pos="53" x="635" y="51" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">53</text></a>
+      <a id="pos-54" href="#pos-54"><text data-pos="54" x="609" y="112" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">54</text></a>
+      <a id="pos-55" href="#pos-55"><text data-pos="55" x="386" y="254" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">55</text></a>
+      <a id="pos-56" href="#pos-56"><text data-pos="56" x="626" y="81" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">56</text></a>
+      <a id="pos-60" href="#pos-60"><text data-pos="60" x="767" y="520" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">60</text></a>
+      <a id="pos-64" href="#pos-64"><text data-pos="64" x="852" y="565" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">64</text></a>
+      <a id="pos-67" href="#pos-67"><text data-pos="67" x="700" y="508" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">67</text></a>
+      <a id="pos-72" href="#pos-72"><text data-pos="72" x="686" y="447" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">72</text></a>
+      <a id="pos-77" href="#pos-77"><text data-pos="77" x="781" y="381" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">77</text></a>
+      <a id="pos-81" href="#pos-81"><text data-pos="81" x="659" y="351" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">81</text></a>
+      <a id="pos-87" href="#pos-87"><text data-pos="87" x="551" y="409" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">87</text></a>
+      <a id="pos-92" href="#pos-92"><text data-pos="92" x="478" y="378" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">92</text></a>
+      <a id="pos-97" href="#pos-97"><text data-pos="97" x="33" y="102" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">97</text></a>
+      <a id="pos-107" href="#pos-107"><text data-pos="107" x="237" y="291" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">107</text></a>
+      <a id="pos-120" href="#pos-120"><text data-pos="120" x="204" y="225" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">120</text></a>
+      <a id="pos-125" href="#pos-125"><text data-pos="125" x="397" y="91" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">125</text></a>
+      <a id="pos-128" href="#pos-128"><text data-pos="128" x="775" y="64" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">128</text></a>
+      <a id="pos-135" href="#pos-135"><text data-pos="135" x="633" y="280" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">135</text></a>
+      <a id="pos-142" href="#pos-142"><text data-pos="142" x="142" y="342" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600">142</text></a>
+  </g>
 </svg>

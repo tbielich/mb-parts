@@ -21,6 +21,31 @@ npm install
 npm run dev
 ```
 
+## Batch-Rendering fuer Katalogillustrationen
+
+Ein Node-only Batch-Renderer fuer Mercedes-Benz Ersatzteilzeichnungen ist im Repo enthalten.
+
+Einmalig vorbereiten:
+
+```bash
+cp .env.example .env
+# OPENAI_API_KEY in .env setzen
+npm install
+```
+
+Batch-Lauf:
+
+```bash
+npm run render
+```
+
+Hinweise:
+
+- Inputs werden standardmaessig aus `public/data/diagrams/group-*.png` gelesen.
+- Outputs werden als `outputs/<same-basename>.png` geschrieben.
+- Jeder Output bleibt exakt `1536x1024`.
+- Der Pipeline-Schritt fuehrt kein Upscaling und kein Downscaling durch; er trimmt nur Scanraender, fuegt weissen Rand hinzu und zentriert auf einer weissen `1536x1024`-Flaeche.
+
 ## Datenpipeline
 
 Der Build erwartet eine Quelle:
@@ -64,12 +89,12 @@ npm run build
 - `npm run render:svg:ci` – `render:svg` nur ausführen, wenn benötigte Binaries vorhanden sind
 - `npm run render:all` – `render:png` + `render:svg`
 
-## Diagramm-Vektorisierung (SVG + OCR-Anker)
+## Diagramm-Vektorisierung (SVG + Map-Anker)
 
 Prerequisites (macOS/Homebrew):
 
 ```bash
-brew install vtracer potrace imagemagick tesseract
+brew install vtracer potrace imagemagick
 ```
 
 Standardlauf:
@@ -81,7 +106,7 @@ npm run render:svg
 Optional mit Parametern:
 
 ```bash
-node scripts/render-svg-with-ocr.mjs --in public/data/diagrams-960 --out public/data/diagrams-svg --engine auto --ocr-threshold 60
+node scripts/render-svg-with-ocr.mjs --in public/data/diagrams-960 --out public/data/diagrams-svg --map public/data/parts-diagram-map.json --engine auto
 ```
 
 Output:
@@ -92,14 +117,14 @@ Output:
 Die SVGs enthalten:
 
 - `<g id="art">` (vektorisierte Linienzeichnung)
-- `<g id="labels">` (OCR-Zahlen als selektierbarer Text)
+- `<g id="labels">` (Positionsnummern aus `parts-diagram-map.json` als selektierbarer Text)
 - Anker-IDs pro Label: `id=\"pos-N\"` + `href=\"#pos-N\"`
 
 Netlify-Workflow:
 
 - Der Build nutzt `npm run build:netlify` (siehe `netlify.toml`).
 - `build:netlify` ruft `render:svg:ci` auf.
-- Falls `vtracer`/`potrace+magick` oder `tesseract` fehlen, wird SVG-Generierung übersprungen und mit vorhandenen SVGs + PNG-Fallback weitergebaut.
+- Falls `vtracer`/`potrace` oder `magick` fehlen, wird SVG-Generierung übersprungen und mit vorhandenen SVGs + PNG-Fallback weitergebaut.
 
 ## API Endpoints
 

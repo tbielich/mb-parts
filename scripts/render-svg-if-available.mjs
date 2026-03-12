@@ -3,7 +3,7 @@ import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
 
-const BINARY_NAMES = ['vtracer', 'potrace', 'magick', 'tesseract'];
+const BINARY_NAMES = ['vtracer', 'potrace', 'magick'];
 
 function isStrictMode() {
   return String(process.env.RENDER_SVG_STRICT ?? '').trim() === '1';
@@ -30,9 +30,6 @@ function logSkipReason(available) {
   const reasons = [];
   if (!hasSupportedVectorEngine(available)) {
     reasons.push('no vector engine (need vtracer or potrace+magick)');
-  }
-  if (!available.tesseract) {
-    reasons.push('missing tesseract');
   }
   return reasons;
 }

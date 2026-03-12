@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process';
-import { mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, extname, join, resolve } from 'node:path';
 import { promisify } from 'node:util';
@@ -9,8 +9,14 @@ const execFileAsync = promisify(execFile);
 const DEFAULT_INPUT_DIR = 'public/data/diagrams-960';
 const FALLBACK_INPUT_DIRS = ['public/data/diagrams'];
 const DEFAULT_OUTPUT_DIR = 'public/data/diagrams-svg';
+const DEFAULT_MAP_PATH = 'public/data/parts-diagram-map.json';
 const DEFAULT_ENGINE = 'auto';
-const DEFAULT_OCR_THRESHOLD = 60;
+const MASK_LABELS_BEFORE_TRACING = false;
+const OCR_MASK_PADDING = 1;
+const LABEL_MASK_CHAR_WIDTH_FACTOR = 0.68;
+const LABEL_MASK_HEIGHT_FACTOR = 1.2;
+const LABEL_MASK_MIN_WIDTH = 10;
+const LABEL_MASK_MIN_HEIGHT = 10;
 const SVG_WIDTH = 960;
 const SVG_HEIGHT = 640;
 
@@ -19,8 +25,8 @@ function parseArgs(argv) {
     inputDir: DEFAULT_INPUT_DIR,
     inputDirExplicit: false,
     outputDir: DEFAULT_OUTPUT_DIR,
+    mapPath: DEFAULT_MAP_PATH,
     engine: DEFAULT_ENGINE,
-    ocrThreshold: DEFAULT_OCR_THRESHOLD,
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -36,17 +42,13 @@ function parseArgs(argv) {
       i += 1;
       continue;
     }
-    if (token === '--engine' && argv[i + 1]) {
-      options.engine = argv[i + 1];
+    if (token === '--map' && argv[i + 1]) {
+      options.mapPath = argv[i + 1];
       i += 1;
       continue;
     }
-    if (token === '--ocr-threshold' && argv[i + 1]) {
-      const parsed = Number.parseInt(argv[i + 1], 10);
-      if (!Number.isFinite(parsed)) {
-        throw new Error(`Invalid value for --ocr-threshold: ${argv[i + 1]}`);
-      }
-      options.ocrThreshold = parsed;
+    if (token === '--engine' && argv[i + 1]) {
+      options.engine = argv[i + 1];
       i += 1;
       continue;
     }
@@ -65,8 +67,8 @@ function printHelp() {
     `Options:\n` +
     `  --in <dir>             Input folder with PNG diagrams (default: ${DEFAULT_INPUT_DIR})\n` +
     `  --out <dir>            Output folder for SVG diagrams (default: ${DEFAULT_OUTPUT_DIR})\n` +
-    `  --engine <mode>        auto|vtracer|potrace (default: ${DEFAULT_ENGINE})\n` +
-    `  --ocr-threshold <num>  OCR confidence threshold (default: ${DEFAULT_OCR_THRESHOLD})\n`);
+    `  --map <file>           Diagram mapping JSON (default: ${DEFAULT_MAP_PATH})\n` +
+    `  --engine <mode>        auto|vtracer|potrace (default: ${DEFAULT_ENGINE})\n`);
 }
 
 async function runCommand(command, args) {
@@ -123,19 +125,33 @@ function extractSvgInner(rawSvg) {
   return match[1].trim();
 }
 
+function computeLabelFontSize(label) {
+  return clamp(Math.round((Number(label.height) || 14) * 0.22), 10, 14);
+}
+
+function computeLabelMaskSize(label) {
+  const fontSize = computeLabelFontSize(label);
+  const charCount = Math.max(1, String(label.pos ?? '').length);
+  return {
+    width: Math.max(LABEL_MASK_MIN_WIDTH, Math.round(fontSize * charCount * LABEL_MASK_CHAR_WIDTH_FACTOR)),
+    height: Math.max(LABEL_MASK_MIN_HEIGHT, Math.round(fontSize * LABEL_MASK_HEIGHT_FACTOR)),
+  };
+}
+
 function buildLabelsSvg(labels) {
   if (labels.length === 0) {
-    return '<g id="labels" font-family="Helvetica, Arial, sans-serif" fill="#111" font-size="14"></g>';
+    return '<g id="labels" font-family="Helvetica, Arial, sans-serif" fill="#111" font-size="14" opacity="0" pointer-events="none"></g>';
   }
 
   const lines = labels.map((label) => {
     const posId = `pos-${label.pos}`;
+    const fontSize = computeLabelFontSize(label);
     return `    <a id="${escapeXml(posId)}" href="#${escapeXml(posId)}">` +
-      `<text data-pos="${escapeXml(label.pos)}" x="${label.x}" y="${label.y}">${escapeXml(label.pos)}</text></a>`;
+      `<text data-pos="${escapeXml(label.pos)}" x="${label.x}" y="${label.y}" text-anchor="middle" dominant-baseline="middle" font-size="${fontSize}" font-weight="600">${escapeXml(label.pos)}</text></a>`;
   });
 
   return [
-    '<g id="labels" font-family="Helvetica, Arial, sans-serif" fill="#111" font-size="14" text-rendering="geometricPrecision">',
+    '<g id="labels" font-family="Helvetica, Arial, sans-serif" fill="#111" font-size="14" text-rendering="geometricPrecision" opacity="0" pointer-events="none">',
     ...lines,
     '</g>',
   ].join('\n');
@@ -232,89 +248,185 @@ async function vectorizeWithPotrace(inputPath, outputPath, tempDir) {
   ]);
 }
 
-function parseTsv(tsvContent, confidenceThreshold) {
-  const lines = String(tsvContent).split(/\r?\n/).filter((line) => line.length > 0);
-  if (lines.length <= 1) {
-    return [];
+function parseCoordinateValues(coords) {
+  return String(coords ?? '')
+    .split(',')
+    .map((value) => Number.parseFloat(value.trim()))
+    .filter((value) => Number.isFinite(value));
+}
+
+function toBoundingBox(coords, shape) {
+  const values = parseCoordinateValues(coords);
+  if (values.length < 3) {
+    return null;
   }
 
-  const headers = lines[0].split('\t');
-  const col = {
-    left: headers.indexOf('left'),
-    top: headers.indexOf('top'),
-    width: headers.indexOf('width'),
-    height: headers.indexOf('height'),
-    conf: headers.indexOf('conf'),
-    text: headers.indexOf('text'),
-  };
+  const normalizedShape = String(shape ?? 'rect').trim().toLowerCase();
+  let minX;
+  let minY;
+  let maxX;
+  let maxY;
 
-  if (Object.values(col).some((index) => index < 0)) {
-    return [];
+  if (normalizedShape === 'circle' && values.length >= 3) {
+    const [cx, cy, radius] = values;
+    minX = cx - radius;
+    minY = cy - radius;
+    maxX = cx + radius;
+    maxY = cy + radius;
+  } else if ((normalizedShape === 'poly' || normalizedShape === 'polygon') && values.length >= 4) {
+    const xs = [];
+    const ys = [];
+    for (let i = 0; i + 1 < values.length; i += 2) {
+      xs.push(values[i]);
+      ys.push(values[i + 1]);
+    }
+    if (xs.length === 0 || ys.length === 0) {
+      return null;
+    }
+    minX = Math.min(...xs);
+    minY = Math.min(...ys);
+    maxX = Math.max(...xs);
+    maxY = Math.max(...ys);
+  } else if (values.length >= 4) {
+    minX = Math.min(values[0], values[2]);
+    minY = Math.min(values[1], values[3]);
+    maxX = Math.max(values[0], values[2]);
+    maxY = Math.max(values[1], values[3]);
+  } else {
+    return null;
   }
 
+  const left = clamp(Math.round(minX), 0, SVG_WIDTH - 1);
+  const top = clamp(Math.round(minY), 0, SVG_HEIGHT - 1);
+  const right = clamp(Math.round(maxX), 0, SVG_WIDTH);
+  const bottom = clamp(Math.round(maxY), 0, SVG_HEIGHT);
+  const width = Math.max(1, right - left);
+  const height = Math.max(1, bottom - top);
+
+  return { left, top, width, height };
+}
+
+function normalizePositionValue(value) {
+  const normalized = String(value ?? '').trim().replace(/[^0-9]/g, '');
+  return normalized;
+}
+
+function sortLabelsByPosition(a, b) {
+  const an = Number.parseFloat(a.pos);
+  const bn = Number.parseFloat(b.pos);
+  if (Number.isFinite(an) && Number.isFinite(bn) && an !== bn) {
+    return an - bn;
+  }
+  if (a.y !== b.y) {
+    return a.y - b.y;
+  }
+  if (a.x !== b.x) {
+    return a.x - b.x;
+  }
+  return a.pos.localeCompare(b.pos);
+}
+
+function buildLabelsFromEntries(entries) {
   const byPos = new Map();
 
-  for (let i = 1; i < lines.length; i += 1) {
-    const cells = lines[i].split('\t');
-    const conf = Number.parseFloat(cells[col.conf]);
-    if (!Number.isFinite(conf) || conf < confidenceThreshold) {
-      continue;
-    }
-
-    const rawText = String(cells[col.text] ?? '').trim();
-    const pos = rawText.replace(/[^0-9]/g, '');
+  for (const entry of entries) {
+    const pos = normalizePositionValue(entry.position);
     if (!pos) {
       continue;
     }
-
-    const left = Number.parseInt(cells[col.left], 10);
-    const top = Number.parseInt(cells[col.top], 10);
-    const width = Number.parseInt(cells[col.width], 10);
-    const height = Number.parseInt(cells[col.height], 10);
-    if (![left, top, width, height].every(Number.isFinite)) {
+    const bbox = toBoundingBox(entry.coords, entry.shape);
+    if (!bbox) {
       continue;
     }
 
-    const label = {
-      pos,
-      conf,
-      x: clamp(Math.round(left + width * 0.5), 0, SVG_WIDTH - 1),
-      y: clamp(Math.round(top + height - 2), 0, SVG_HEIGHT - 1),
-    };
+    const coordKey = `${bbox.left},${bbox.top},${bbox.width},${bbox.height}`;
+    const candidateMap = byPos.get(pos) ?? new Map();
+    const existing = candidateMap.get(coordKey);
+    if (existing) {
+      existing.count += 1;
+    } else {
+      candidateMap.set(coordKey, {
+        pos,
+        left: bbox.left,
+        top: bbox.top,
+        width: bbox.width,
+        height: bbox.height,
+        area: bbox.width * bbox.height,
+        count: 1,
+        coordKey,
+      });
+    }
+    byPos.set(pos, candidateMap);
+  }
 
-    const existing = byPos.get(pos);
-    if (!existing || label.conf > existing.conf || (label.conf === existing.conf && (label.y < existing.y || (label.y === existing.y && label.x < existing.x)))) {
-      byPos.set(pos, label);
+  const labels = [];
+  for (const [pos, candidateMap] of byPos.entries()) {
+    const best = Array.from(candidateMap.values())
+      .sort((a, b) => (
+        b.count - a.count ||
+        a.area - b.area ||
+        a.top - b.top ||
+        a.left - b.left ||
+        a.coordKey.localeCompare(b.coordKey)
+      ))[0];
+
+    labels.push({
+      pos,
+      left: best.left,
+      top: best.top,
+      width: best.width,
+      height: best.height,
+      x: clamp(Math.round(best.left + best.width * 0.5), 0, SVG_WIDTH - 1),
+      y: clamp(Math.round(best.top + best.height * 0.5), 0, SVG_HEIGHT - 1),
+    });
+  }
+
+  return labels.sort(sortLabelsByPosition);
+}
+
+function buildLabelIndexFromDiagramMap(diagramMap) {
+  const byFile = new Map();
+  const mapping = diagramMap?.mappingsByPartNumber ?? {};
+  for (const entries of Object.values(mapping)) {
+    for (const entry of entries) {
+      const fileName = basename(String(entry?.imageUrl ?? '').trim());
+      if (!fileName || extname(fileName).toLowerCase() !== '.png') {
+        continue;
+      }
+      const list = byFile.get(fileName) ?? [];
+      list.push({
+        position: entry.position,
+        coords: entry.coords,
+        shape: entry.shape,
+      });
+      byFile.set(fileName, list);
     }
   }
 
-  return Array.from(byPos.values()).sort((a, b) => {
-    const an = Number.parseFloat(a.pos);
-    const bn = Number.parseFloat(b.pos);
-    if (Number.isFinite(an) && Number.isFinite(bn) && an !== bn) {
-      return an - bn;
-    }
-    if (a.y !== b.y) {
-      return a.y - b.y;
-    }
-    if (a.x !== b.x) {
-      return a.x - b.x;
-    }
-    return a.pos.localeCompare(b.pos);
-  });
+  const labelIndex = new Map();
+  for (const [fileName, entries] of byFile.entries()) {
+    labelIndex.set(fileName, buildLabelsFromEntries(entries));
+  }
+  return labelIndex;
 }
 
-async function extractOcrLabels(inputPath, confidenceThreshold) {
-  const { stdout } = await runCommand('tesseract', [
-    inputPath,
-    'stdout',
-    'tsv',
-    '--psm',
-    '11',
-    '-c',
-    'tessedit_char_whitelist=0123456789',
-  ]);
-  return parseTsv(stdout, confidenceThreshold);
+async function createMaskedPng(inputPath, maskedPath, labels) {
+  if (labels.length === 0) {
+    await copyFile(inputPath, maskedPath);
+    return;
+  }
+
+  const args = [inputPath, '-fill', 'white'];
+  for (const label of labels) {
+    const maskSize = computeLabelMaskSize(label);
+    const x1 = clamp(Math.round(label.x - maskSize.width * 0.5) - OCR_MASK_PADDING, 0, SVG_WIDTH - 1);
+    const y1 = clamp(Math.round(label.y - maskSize.height * 0.5) - OCR_MASK_PADDING, 0, SVG_HEIGHT - 1);
+    const x2 = clamp(Math.round(label.x + maskSize.width * 0.5) + OCR_MASK_PADDING, 0, SVG_WIDTH - 1);
+    const y2 = clamp(Math.round(label.y + maskSize.height * 0.5) + OCR_MASK_PADDING, 0, SVG_HEIGHT - 1);
+    args.push('-draw', `rectangle ${x1},${y1} ${x2},${y2}`);
+  }
+  args.push(maskedPath);
+  await runCommand('magick', args);
 }
 
 function chooseEngine(requestedEngine, binaries) {
@@ -378,6 +490,7 @@ async function main() {
   options.engine = normalizeEngine(options.engine);
 
   const outputDir = resolve(process.cwd(), options.outputDir);
+  const mapPath = resolve(process.cwd(), options.mapPath);
   const warnings = [];
 
   const inputDir = await resolveInputDir(options, warnings);
@@ -388,15 +501,22 @@ async function main() {
 
   if (fileNames.length === 0) {
     console.log(`[render:svg] no PNG files found in ${inputDir}`);
-    console.log('[render:svg] summary processed=0 skipped=0 ocr_labels=0 missing_binaries=none');
+    console.log('[render:svg] summary processed=0 skipped=0 map_labels=0 missing_binaries=none');
     return;
+  }
+
+  let labelsByFile;
+  try {
+    const mapContent = await readFile(mapPath, 'utf8');
+    labelsByFile = buildLabelIndexFromDiagramMap(JSON.parse(mapContent));
+  } catch (error) {
+    throw new Error(`Failed to load diagram map from ${mapPath}: ${error instanceof Error ? error.message : String(error)}`);
   }
 
   const binaries = {
     vtracer: await hasBinary('vtracer'),
     potrace: await hasBinary('potrace'),
     magick: await hasBinary('magick'),
-    tesseract: await hasBinary('tesseract'),
   };
 
   const missingBinaries = Object.entries(binaries)
@@ -409,18 +529,7 @@ async function main() {
   } catch (error) {
     warnings.push(error instanceof Error ? error.message : String(error));
     const missingSummary = missingBinaries.length > 0 ? missingBinaries.join(',') : 'none';
-    console.log(`[render:svg] summary processed=0 skipped=${fileNames.length} ocr_labels=0 missing_binaries=${missingSummary}`);
-    console.log('[render:svg] warnings:');
-    for (const warning of warnings) {
-      console.log(`  - ${warning}`);
-    }
-    process.exitCode = 1;
-    return;
-  }
-  if (!binaries.tesseract) {
-    warnings.push('tesseract is required for OCR labels but is missing.');
-    const missingSummary = missingBinaries.length > 0 ? missingBinaries.join(',') : 'none';
-    console.log(`[render:svg] summary processed=0 skipped=${fileNames.length} ocr_labels=0 missing_binaries=${missingSummary}`);
+    console.log(`[render:svg] summary processed=0 skipped=${fileNames.length} map_labels=0 missing_binaries=${missingSummary}`);
     console.log('[render:svg] warnings:');
     for (const warning of warnings) {
       console.log(`  - ${warning}`);
@@ -433,10 +542,11 @@ async function main() {
 
   let processed = 0;
   let skipped = 0;
-  let ocrLabelCount = 0;
+  let mapLabelCount = 0;
 
   console.log(`[render:svg] input=${inputDir}`);
   console.log(`[render:svg] output=${outputDir}`);
+  console.log(`[render:svg] map=${mapPath}`);
   console.log(`[render:svg] engine=${engine}`);
 
   for (const fileName of fileNames) {
@@ -444,25 +554,29 @@ async function main() {
     const inputPath = join(inputDir, fileName);
     const outputPath = join(outputDir, `${fileStem}.svg`);
     const tempDir = await mkdtemp(join(tmpdir(), 'mb-svg-'));
+    const maskedPngPath = join(tempDir, `${fileStem}.masked.png`);
     const tracedSvgPath = join(tempDir, `${fileStem}.traced.svg`);
 
     try {
+      const labels = labelsByFile.get(fileName) ?? [];
+      const tracingInputPath = MASK_LABELS_BEFORE_TRACING
+        ? (await createMaskedPng(inputPath, maskedPngPath, labels), maskedPngPath)
+        : inputPath;
+
       if (engine === 'vtracer') {
-        await vectorizeWithVtracer(inputPath, tracedSvgPath, warnings);
+        await vectorizeWithVtracer(tracingInputPath, tracedSvgPath, warnings);
       } else {
-        await vectorizeWithPotrace(inputPath, tracedSvgPath, tempDir);
+        await vectorizeWithPotrace(tracingInputPath, tracedSvgPath, tempDir);
       }
 
       const tracedSvg = await readFile(tracedSvgPath, 'utf8');
       const artInner = extractSvgInner(tracedSvg);
 
-      const labels = await extractOcrLabels(inputPath, options.ocrThreshold);
-
       const finalSvg = buildFinalSvg(fileStem, artInner, labels);
       await writeFile(outputPath, finalSvg, 'utf8');
 
       processed += 1;
-      ocrLabelCount += labels.length;
+      mapLabelCount += labels.length;
       console.log(`[render:svg] ${fileName} -> ${basename(outputPath)} labels=${labels.length}`);
     } catch (error) {
       skipped += 1;
@@ -474,7 +588,7 @@ async function main() {
   }
 
   const missingSummary = missingBinaries.length > 0 ? missingBinaries.join(',') : 'none';
-  console.log(`[render:svg] summary processed=${processed} skipped=${skipped} ocr_labels=${ocrLabelCount} missing_binaries=${missingSummary}`);
+  console.log(`[render:svg] summary processed=${processed} skipped=${skipped} map_labels=${mapLabelCount} missing_binaries=${missingSummary}`);
 
   if (warnings.length > 0) {
     console.log('[render:svg] warnings:');
