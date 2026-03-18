@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 
 export const DEFAULT_PREFIXES = ['A309', 'A310'];
 export const MAX_LIMIT = 5000;
-const BASE_SNAPSHOT_JSON_PATH = resolve(process.cwd(), 'public/data/parts-base.json');
+const BASE_SNAPSHOT_JSON_PATH = resolve(process.cwd(), 'static/data/parts-base.json');
 const AVAILABILITY_FETCH_CONCURRENCY = 6;
 const DETAIL_FETCH_RETRIES = 3;
 const DETAIL_FETCH_TIMEOUT_MS = 15000;

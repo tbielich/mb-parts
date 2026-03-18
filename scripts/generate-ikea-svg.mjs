@@ -1,8 +1,8 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { basename, resolve } from 'node:path';
 
-const INPUT_PATH = resolve(process.cwd(), 'public/data/parts-diagram-map.json');
-const OUTPUT_DIR = resolve(process.cwd(), 'public/data/diagrams/ikea-svg');
+const INPUT_PATH = resolve(process.cwd(), 'static/data/parts-diagram-map.json');
+const OUTPUT_DIR = resolve(process.cwd(), 'static/data/diagrams/ikea-svg');
 
 function normalizeText(value) {
   return String(value ?? '').replace(/\s+/g, ' ').trim();
@@ -236,7 +236,7 @@ async function main() {
 
   let written = 0;
   for (const [imageKey, entries] of byImage.entries()) {
-    const pngPath = resolve(process.cwd(), 'public/data/diagrams', `${imageKey}.png`);
+    const pngPath = resolve(process.cwd(), 'static/data/diagrams', `${imageKey}.png`);
     let imageSize;
     try {
       const pngBinary = await readFile(pngPath);

@@ -6,10 +6,10 @@ import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
 
-const DEFAULT_INPUT_DIR = 'public/data/diagrams-960';
-const FALLBACK_INPUT_DIRS = ['public/data/diagrams'];
-const DEFAULT_OUTPUT_DIR = 'public/data/diagrams-svg';
-const DEFAULT_MAP_PATH = 'public/data/parts-diagram-map.json';
+const DEFAULT_INPUT_DIR = 'static/data/diagrams-960';
+const FALLBACK_INPUT_DIRS = ['static/data/diagrams'];
+const DEFAULT_OUTPUT_DIR = 'static/data/diagrams-svg';
+const DEFAULT_MAP_PATH = 'static/data/parts-diagram-map.json';
 const DEFAULT_ENGINE = 'auto';
 const MASK_LABELS_BEFORE_TRACING = false;
 const OCR_MASK_PADDING = 1;

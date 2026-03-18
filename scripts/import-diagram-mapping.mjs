@@ -5,8 +5,8 @@ import { dirname, resolve } from 'node:path';
 import { promisify } from 'node:util';
 
 const BASE_URL = 'https://mb-teilekatalog.info';
-const OUTPUT_PATH = resolve(process.cwd(), 'public/data/parts-diagram-map.json');
-const DIAGRAMS_OUTPUT_DIR = resolve(process.cwd(), 'public/data/diagrams');
+const OUTPUT_PATH = resolve(process.cwd(), 'static/data/parts-diagram-map.json');
+const DIAGRAMS_OUTPUT_DIR = resolve(process.cwd(), 'static/data/diagrams');
 const IMAGE_NAME_PREFIX = 'group-';
 const TARGET_IMAGE_WIDTH = 960;
 const TARGET_IMAGE_HEIGHT = 640;

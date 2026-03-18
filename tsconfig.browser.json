@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist/assets/js",
+    "rootDir": "client",
+    "types": [],
+    "sourceMap": false,
+    "allowImportingTsExtensions": false
+  },
+  "include": ["client/main.ts", "client/groups.ts", "client/chatbot.ts"]
+}

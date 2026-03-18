@@ -1,11 +1,11 @@
 # mb-parts-poc
 
-Ein produktionsnahes Parts-Portal für Mercedes-Teile mit strukturierter Datenpipeline, performanter UI und integriertem Netlify Release-Workflow.
+Ein produktionsnahes Parts-Portal für Mercedes-Teile mit strukturierter Datenpipeline, performanter UI, 11ty-basierter Seitengenerierung und integriertem Netlify Release-Workflow.
 
-Vite + TypeScript PoC für Mercedes-Teile (`A309`/`A310`) mit:
+11ty + TypeScript PoC für Mercedes-Teile (`A309`/`A310`) mit:
 
 - tabellarischer UI (Suche, Sortierung, Pagination)
-- Chunk-basierten Daten unter `public/data/vehicles/...`
+- Chunk-basierten Daten unter `static/data/vehicles/...`
 - Preis-/Verfügbarkeits-Enrichment
 - Netlify Functions für produktive `/api/*` Endpoints
 
@@ -20,6 +20,13 @@ Vite + TypeScript PoC für Mercedes-Teile (`A309`/`A310`) mit:
 npm install
 npm run dev
 ```
+
+`npm run dev` startet zuerst die Daten- und Browser-Builds und danach parallel:
+
+- TypeScript im Watch-Modus für Browser-JavaScript
+- 11ty mit lokalem Dev-Server
+
+Die 11ty-Quellen liegen unter `site/`. Browser-Logik liegt unter `client/`. 11ty rendert direkt nach `dist/`. Statische Assets liegen unter `site/assets/`, unveränderte ausgelieferte Dateien und Daten unter `static/`.
 
 ## Batch-Rendering fuer Katalogillustrationen
 
@@ -41,7 +48,7 @@ npm run render
 
 Hinweise:
 
-- Inputs werden standardmaessig aus `public/data/diagrams/group-*.png` gelesen.
+- Inputs werden standardmaessig aus `static/data/diagrams/group-*.png` gelesen.
 - Outputs werden als `outputs/<same-basename>.png` geschrieben.
 - Jeder Output bleibt exakt `1536x1024`.
 - Der Pipeline-Schritt fuehrt kein Upscaling und kein Downscaling durch; er trimmt nur Scanraender, fuegt weissen Rand hinzu und zentriert auf einer weissen `1536x1024`-Flaeche.
@@ -51,7 +58,7 @@ Hinweise:
 Der Build erwartet eine Quelle:
 
 - bevorzugt `data/vehicles/default/index/parts.ndjson`
-- alternativ `public/data/parts-base.json`
+- alternativ `static/data/parts-base.json`
 
 ### Daten erzeugen
 
@@ -62,7 +69,7 @@ npm run build:data
 Das Script macht:
 
 1. optional `migrate` (`parts-base.json` -> `data/.../parts.ndjson`)
-2. `chunk:index` (`parts.ndjson` -> `public/data/vehicles/default/index/chunks/*`)
+2. `chunk:index` (`parts.ndjson` -> `static/data/vehicles/default/index/chunks/*`)
 
 ### Produktions-Build
 
@@ -70,22 +77,25 @@ Das Script macht:
 npm run build
 ```
 
-`build` führt automatisch `build:data` aus.
+`build` führt automatisch `build:data`, `build:browser` und danach `pages:build` aus.
 
 ## Wichtige Scripts
 
-- `npm run dev` – lokaler Vite Dev Server
+- `npm run dev` – Daten-Build + Browser-JS-Build + 11ty Dev-Server
+- `npm run pages:build` – HTML-Seiten aus `site/` mit 11ty generieren
+- `npm run pages:watch` – 11ty Watch-Modus für Seitentemplates
+- `npm run build:browser` – Browser-JavaScript nach `dist/assets/js` kompilieren
 - `npm run build:data` – Daten für UI vorbereiten
 - `npm run migrate` – JSON Snapshot -> NDJSON
 - `npm run chunk:index` – NDJSON -> Chunk-Index
-- `npm run build` – Build inkl. Datenvorbereitung
+- `npm run build` – Build inkl. Daten- und Browser-JS-Vorbereitung
 - `npm run build:netlify` – Netlify-Build inkl. SVG-Render mit Binary-Check
 - `npm run typecheck` – TypeScript-Check ohne Build-Artefakte
 - `npm run test` – Platzhalter (`not configured`)
 - `npm run lint` – Platzhalter (`not configured`)
 - `npm run format` – Platzhalter (`not configured`)
 - `npm run render:png` – Diagramm-PNGs importieren/aufbereiten
-- `npm run render:svg` – Diagramm-SVGs erzeugen (Default: `public/data/diagrams-960`, Fallback: `public/data/diagrams`)
+- `npm run render:svg` – Diagramm-SVGs erzeugen (Default: `static/data/diagrams-960`, Fallback: `static/data/diagrams`)
 - `npm run render:svg:ci` – `render:svg` nur ausführen, wenn benötigte Binaries vorhanden sind
 - `npm run render:all` – `render:png` + `render:svg`
 
@@ -106,13 +116,13 @@ npm run render:svg
 Optional mit Parametern:
 
 ```bash
-node scripts/render-svg-with-ocr.mjs --in public/data/diagrams-960 --out public/data/diagrams-svg --map public/data/parts-diagram-map.json --engine auto
+node scripts/render-svg-with-ocr.mjs --in static/data/diagrams-960 --out static/data/diagrams-svg --map static/data/parts-diagram-map.json --engine auto
 ```
 
 Output:
 
-- Input-PNGs: `public/data/diagrams-960/*.png` (oder Fallback `public/data/diagrams/*.png`)
-- Output-SVGs: `public/data/diagrams-svg/*.svg`
+- Input-PNGs: `static/data/diagrams-960/*.png` (oder Fallback `static/data/diagrams/*.png`)
+- Output-SVGs: `static/data/diagrams-svg/*.svg`
 
 Die SVGs enthalten:
 
@@ -128,12 +138,15 @@ Netlify-Workflow:
 
 ## API Endpoints
 
-### Lokal (Vite Middleware)
+### Lokal
 
 - `POST /api/sync`
 - `POST /api/sync-prices`
 - `POST /api/enrich-visible`
 - `POST /api/chat`
+
+Für lokale Function-Entwicklung ist `netlify dev` der passende Einstieg.  
+`npm run dev` konzentriert sich auf 11ty, statische Assets und Browser-JavaScript.
 
 ### Netlify (Functions + Redirects in `netlify.toml`)
 
@@ -146,8 +159,8 @@ Netlify-Workflow:
 
 Der PoC enthält ein minimales Beratungs-Widget auf der Startseite:
 
-- Frontend: `src/chatbot.ts` (floating Chat-Widget, API-Call, Ergebnis-Karten)
-- Styling: `src/style.css` (`.parts-chat*`)
+- Frontend: `client/chatbot.ts` (floating Chat-Widget, API-Call, Ergebnis-Karten)
+- Styling: `site/assets/css/app.css` (`.parts-chat*`)
 - Backend: `POST /api/chat` (regelbasierte Katalog-Suche)
 
 ### Request/Response
@@ -201,7 +214,7 @@ Response (gekürzt):
 - Publish dir: `dist`
 - Functions dir: `netlify/functions`
 
-Hinweis: Die Functions nutzen `public/data/parts-base.json` als Basis.  
+Hinweis: Die Functions nutzen `static/data/parts-base.json` als Basis.  
 Fehlt die Datei, schlägt Sync fehl.
 
 ## Netlify MCP + Release Flow

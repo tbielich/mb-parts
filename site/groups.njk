@@ -1,0 +1,131 @@
+---
+layout: layouts/base.njk
+title: MB Teilegruppen
+stylesheets:
+  - /assets/css/groups.css
+scripts:
+  - /assets/js/groups.js
+permalink: /groups.html
+---
+<main class="groups-app">
+  <header class="groups-header">
+    <div>
+      <h1>MB Teilegruppen</h1>
+    </div>
+    <a class="back-link" href="/">Zurück zur Teileliste</a>
+  </header>
+
+  <p id="groups-status" class="groups-status" role="status" aria-live="polite" aria-atomic="true">{{ groupsPage.initialStatus }}</p>
+
+  <div class="groups-layout">
+    <aside class="groups-sidebar" aria-label="Gruppen und Unterseiten">
+      <h2>Gruppen</h2>
+      <div id="group-list" class="group-list">
+        {% for group in groupsPage.groups %}
+        {% if group.hasEntries and group.view %}
+        <a
+          class="group-nav-link{% if group.isActive %} is-active{% endif %}"
+          href="{{ group.href | escape }}"
+          data-group="{{ group.code | escape }}"
+          {% if group.isActive %}aria-current="page"{% endif %}
+        >{{ group.label | escape }}</a>
+        {% else %}
+        <span class="group-nav-link is-inactive" aria-disabled="true">{{ group.label | escape }}</span>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </aside>
+
+    <section class="groups-content" aria-label="Diagramm und Teile">
+      <h2 id="selection-title">{{ groupsPage.initialView.groupLabel | escape }}</h2>
+      <div class="diagram-card">
+        <div class="diagram-toolbar">
+          <a id="diagram-open-link" href="{{ groupsPage.initialView.sourceUrl | escape }}" target="_blank" rel="noopener">Original öffnen</a>
+        </div>
+        <div class="diagram-wrap">
+          <img
+            id="diagram-image"
+            alt="{{ groupsPage.initialView.imageAlt | escape }}"
+            {% if groupsPage.initialView.imagePrimary %}
+            src="{{ groupsPage.initialView.imagePrimary | escape }}"
+            data-fallback-src="{{ groupsPage.initialView.imageFallback | escape }}"
+            style="display: block"
+            {% else %}
+            style="display: none"
+            {% endif %}
+            loading="lazy"
+            usemap="#diagram-map"
+          />
+          <map id="diagram-map" name="diagram-map">
+            {% for area in groupsPage.initialView.areas %}
+            <area
+              shape="{{ area.shape | escape }}"
+              coords="{{ area.coords | escape }}"
+              href="{{ area.href | escape }}"
+              data-position="{{ area.position | escape }}"
+              alt="{{ area.position | escape }}"
+              title="{{ area.label | escape }}"
+              aria-label="{{ area.label | escape }}"
+            />
+            {% endfor %}
+          </map>
+        </div>
+      </div>
+
+      <div class="parts-card">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Pos.</th>
+              <th scope="col">Artikelnummer</th>
+              <th scope="col">Name</th>
+              <th scope="col">Preis</th>
+              <th scope="col">Verfügbarkeit</th>
+              <th scope="col">Link</th>
+            </tr>
+          </thead>
+          <tbody id="diagram-parts-body">
+            {% if groupsPage.initialView.rows.length %}
+            {% for row in groupsPage.initialView.rows %}
+            <tr
+              class="parts-row"
+              {% if row.rowId %}id="{{ row.rowId | escape }}"{% endif %}
+              data-position="{{ row.positionKey | escape }}"
+            >
+              <td>{{ row.position | escape }}</td>
+              <td>{{ row.partNumber | escape }}</td>
+              <td>{{ row.displayName | escape }}</td>
+              <td>{{ row.price | escape }}</td>
+              <td><span class="badge badge-{{ row.availabilityStatus | escape }}">{{ row.availabilityLabel | escape }}</span></td>
+              <td>
+                {% if row.hasOriginalLink %}
+                <a
+                  href="{{ row.preferredUrl | escape }}"
+                  target="_blank"
+                  rel="noopener"
+                  aria-label="{{ row.partLabel | escape }}"
+                  title="{{ row.partLabel | escape }}"
+                >Prüfen</a>
+                {% else %}
+                <span class="no-original">{{ row.noOriginalLabel | escape }}</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr><td colspan="6" class="empty">Keine Teile in dieser Unterseite gefunden</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <footer class="groups-footer">
+    <nav class="footer-links" aria-label="Rechtliche Hinweise">
+      <a href="/impressum/">Impressum</a>
+    </nav>
+  </footer>
+</main>
+
+<script id="groups-page-data" type="application/json">{{ groupsPage.clientJson | safe }}</script>

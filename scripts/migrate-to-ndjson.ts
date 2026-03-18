@@ -44,7 +44,7 @@ function parseArgs(argv: string[]): {
   vehicleKey: string;
   prefixes: string[];
 } {
-  let inputPath = resolve(process.cwd(), 'public/data/parts-base.json');
+  let inputPath = resolve(process.cwd(), 'static/data/parts-base.json');
   let vehicleKey = 'default';
   let prefixes = [...DEFAULT_PREFIXES];
 

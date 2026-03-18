@@ -47,7 +47,7 @@ const DEFAULT_CHUNK_SIZE = 25000;
 function parseArgs(argv: string[]): Args {
   let vehicleKey = 'default';
   let input = resolve(process.cwd(), 'data/vehicles/default/index/parts.ndjson');
-  let output = resolve(process.cwd(), 'public/data/vehicles/default/index/chunks');
+  let output = resolve(process.cwd(), 'static/data/vehicles/default/index/chunks');
   let chunkSize = DEFAULT_CHUNK_SIZE;
 
   for (let i = 0; i < argv.length; i += 1) {

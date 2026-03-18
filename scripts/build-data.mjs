@@ -9,10 +9,10 @@ const ndjsonPath = resolve(
   process.cwd(),
   process.env.PARTS_NDJSON_PATH ?? migratedNdjsonPath,
 );
-const baseJsonPath = resolve(process.cwd(), process.env.PARTS_JSON_PATH ?? 'public/data/parts-base.json');
+const baseJsonPath = resolve(process.cwd(), process.env.PARTS_JSON_PATH ?? 'static/data/parts-base.json');
 const chunksOutputPath = resolve(
   process.cwd(),
-  process.env.PARTS_CHUNKS_OUTPUT ?? `public/data/vehicles/${vehicleKey}/index/chunks`,
+  process.env.PARTS_CHUNKS_OUTPUT ?? `static/data/vehicles/${vehicleKey}/index/chunks`,
 );
 
 const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';

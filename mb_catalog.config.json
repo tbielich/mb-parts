@@ -1,6 +1,6 @@
 {
   "model": "gpt-image-1",
-  "inputGlob": "public/data/diagrams/group-*.png",
+  "inputGlob": "static/data/diagrams/group-*.png",
   "outDir": "outputs",
   "promptFile": "img.prompt.txt",
   "api": {
